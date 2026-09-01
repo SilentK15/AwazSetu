@@ -1306,10 +1306,10 @@ elif selected_tab == "dashboard":
             attr=mapbox_attr,
         )
 
-        # Heatmap Layer: weighted by severity score and upvotes
+        # Heatmap Layer: weighted by severity score and upvotes (active unresolved only)
         heat_data = [
             [r["lat"], r["lon"], float(max(r.get("severity_score", 40), 10) + r.get("upvotes", 0) * 5)]
-            for r in records if r.get("lat") and r.get("lon")
+            for r in records if r.get("lat") and r.get("lon") and r.get("status") != "Resolved"
         ]
         if heat_data:
             HeatMap(
@@ -1320,10 +1320,12 @@ elif selected_tab == "dashboard":
                 gradient={0.2: "#3b82f6", 0.4: "#10b981", 0.6: "#f59e0b", 0.8: "#ef4444", 1.0: "#7f1d1d"}
             ).add_to(fmap_admin)
 
-        # Pinpoint Marker Layer
+        # Pinpoint Marker Layer (Active unresolved only)
         for r in records:
+            if r.get("status") == "Resolved":
+                continue
             p_color = backend.PRIORITY_COLORS.get(r["priority"], "#64748b")
-            status_symbol = "⏳" if r["status"] == "Pending" else "⚡" if r["status"] == "In Progress" else "✅"
+            status_symbol = "⏳" if r["status"] == "Pending" else "⚡"
             folium.CircleMarker(
                 location=(r["lat"], r["lon"]),
                 radius=8 + min(r.get("upvotes", 0), 6),
@@ -1356,14 +1358,16 @@ elif selected_tab == "dashboard":
         with f_col1:
             dept_filter = st.selectbox("Filter Department", ["All Departments"] + list(backend.DEPARTMENTS.keys()), key="adm_dept_filter")
         with f_col2:
-            status_filter = st.selectbox("Filter Status", ["All Statuses", "Pending", "In Progress", "Resolved"], key="adm_status_filter")
+            status_filter = st.selectbox("Filter Status", ["Active Only (Pending & In Progress)", "All Statuses", "Pending", "In Progress", "Resolved"], index=0, key="adm_status_filter")
         with f_col3:
             search_ticket = st.text_input("Search ID or Keyword", placeholder="Ticket #, description, ward...", key="adm_search_box")
 
         filtered_records = records
         if dept_filter != "All Departments":
             filtered_records = [r for r in filtered_records if r["department"] == dept_filter]
-        if status_filter != "All Statuses":
+        if status_filter == "Active Only (Pending & In Progress)":
+            filtered_records = [r for r in filtered_records if r["status"] != "Resolved"]
+        elif status_filter != "All Statuses":
             filtered_records = [r for r in filtered_records if r["status"] == status_filter]
         if search_ticket:
             q = search_ticket.lower().strip()
