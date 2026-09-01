@@ -769,7 +769,7 @@ def render_auth_page():
         st.markdown(f"""
         <div class="auth-box">
           <div class="auth-header">
-            <div class="auth-emblem">CN</div>
+            <div class="auth-emblem">AS</div>
             <div class="section-kicker">{t("auth_eyebrow")}</div>
             <h3 style="margin:4px 0 2px 0; color:var(--navy);">{t("auth_title")}</h3>
             <p style="font-size:12px; color:var(--text-muted); margin:0;">{t("auth_subtitle")}</p>
