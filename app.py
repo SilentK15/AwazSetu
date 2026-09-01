@@ -1295,21 +1295,22 @@ elif selected_tab == "dashboard":
 
     scope_banner = ""
     if is_scoped:
-        scope_banner = f"""
-        <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-left:5px solid #2563eb; padding:10px 16px; border-radius:8px; margin:8px 0 14px 0;">
-          <strong style="color:#1e40af; font-size:13.5px; display:block;">🏛️ Department Authority Scope: {admin_dept}</strong>
-          <span style="font-size:11.5px; color:#475569;">Grievance oversight, density heatmaps, and priority resolution queues are filtered exclusively for your department.</span>
-        </div>
-        """
+        scope_banner = (
+            f'<div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-left:5px solid #2563eb; padding:10px 16px; border-radius:8px; margin:8px 0 14px 0;">'
+            f'<strong style="color:#1e40af; font-size:13.5px; display:block;">🏛️ Department Authority Scope: {admin_dept}</strong>'
+            f'<span style="font-size:11.5px; color:#475569;">Grievance oversight, density heatmaps, and priority resolution queues are filtered exclusively for your department.</span>'
+            f'</div>'
+        )
 
-    st.markdown(f"""
-    <div style="margin:4px 0 10px 0;">
-      <div class="section-kicker">{t("dash_kicker")}</div>
-      <h2 style="color:var(--navy); font-size:24px; font-weight:800; margin:2px 0 4px 0;">{t("dash_title")}</h2>
-      <p style="color:var(--text-muted); font-size:12.5px; margin:0;">Real-time incident oversight, GIS density heatmap, and grievance redressal controls.</p>
-    </div>
-    {scope_banner}
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="margin:4px 0 10px 0;">'
+        f'<div class="section-kicker">{t("dash_kicker")}</div>'
+        f'<h2 style="color:var(--navy); font-size:24px; font-weight:800; margin:2px 0 4px 0;">{t("dash_title")}</h2>'
+        f'<p style="color:var(--text-muted); font-size:12.5px; margin:0;">Real-time incident oversight, GIS density heatmap, and grievance redressal controls.</p>'
+        f'</div>'
+        f'{scope_banner}',
+        unsafe_allow_html=True,
+    )
 
     # 4 Essential Operational KPIs
     k1, k2, k3, k4 = st.columns(4)
