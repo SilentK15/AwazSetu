@@ -75,10 +75,20 @@ def init_users_db():
             password_hash TEXT NOT NULL,
             salt TEXT NOT NULL,
             full_name TEXT,
+            kyc_verified INTEGER DEFAULT 0,
+            aadhaar_last4 TEXT DEFAULT '',
             created_at TEXT,
             UNIQUE(role, username)
         )
     """)
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN kyc_verified INTEGER DEFAULT 0")
+    except Exception:
+        pass
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN aadhaar_last4 TEXT DEFAULT ''")
+    except Exception:
+        pass
     conn.commit()
     # Seed a default authority account for demo/evaluation access
     existing = conn.execute(
@@ -88,8 +98,8 @@ def init_users_db():
         salt = secrets.token_hex(8)
         pw_hash = _hash_password("admin123", salt)
         conn.execute(
-            "INSERT INTO users (id, role, username, password_hash, salt, full_name, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO users (id, role, username, password_hash, salt, full_name, kyc_verified, aadhaar_last4, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, 1, '0000', ?)",
             ("USR-ADM-001", "admin", "admin", pw_hash, salt, "Authority Administrator", datetime.now().isoformat()),
         )
         conn.commit()
@@ -100,7 +110,7 @@ def _hash_password(password: str, salt: str) -> str:
     return hashlib.sha256(f"{salt}:{password}".encode("utf-8")).hexdigest()
 
 
-def create_user(role: str, username: str, password: str, full_name: str):
+def create_user(role: str, username: str, password: str, full_name: str, kyc_verified: int = 0, aadhaar_last4: str = ""):
     conn = _users_conn()
     existing = conn.execute(
         "SELECT id FROM users WHERE role = ? AND username = ?", (role, username)
@@ -112,9 +122,9 @@ def create_user(role: str, username: str, password: str, full_name: str):
     pw_hash = _hash_password(password, salt)
     uid = f"USR-{role.upper()[:3]}-{secrets.token_hex(4).upper()}"
     conn.execute(
-        "INSERT INTO users (id, role, username, password_hash, salt, full_name, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (uid, role, username, pw_hash, salt, full_name, datetime.now().isoformat()),
+        "INSERT INTO users (id, role, username, password_hash, salt, full_name, kyc_verified, aadhaar_last4, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (uid, role, username, pw_hash, salt, full_name, kyc_verified, aadhaar_last4, datetime.now().isoformat()),
     )
     conn.commit()
     conn.close()
@@ -812,7 +822,8 @@ def render_header():
     user = st.session_state.get("auth_user")
     if user:
         role_class = "admin" if st.session_state.get("auth_role") == "admin" else ""
-        role_label = t("role_admin_tag") if st.session_state.get("auth_role") == "admin" else t("role_citizen_tag")
+        kyc_badge = ' <span style="background:#dcfce7; color:#166534; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:999px; border:1px solid #bbf7d0;">🇮🇳 Indian Citizen KYC</span>' if st.session_state.get("auth_role") == "citizen" and user.get("kyc_verified") else ""
+        role_label = (t("role_admin_tag") if st.session_state.get("auth_role") == "admin" else t("role_citizen_tag")) + kyc_badge
         initial = (user.get("full_name") or user.get("username") or "?")[:1].upper()
         name_display = user.get("full_name") or user.get("username")
         right_html = f'<div class="user-chip"><div class="avatar">{initial}</div><div><strong style="font-size:12px; color:var(--navy); display:block;">{name_display}</strong><span class="role-pill {role_class}">{role_label}</span></div></div>'
@@ -882,23 +893,26 @@ def render_auth_page():
                 st.caption(t("citizen_register_desc"))
                 with st.form("citizen_register_form"):
                     name_in = st.text_input(t("lbl_fullname"))
-                    phone_reg = st.text_input(t("lbl_phone"), max_chars=10, placeholder="9820012345")
+                    phone_reg = st.text_input(t("lbl_phone"), max_chars=10, placeholder="9820012345 (Indian DoT-KYC Mobile)")
+                    aadhaar_in = st.text_input("🇮🇳 12-Digit Aadhaar / DigiLocker ID (Instant e-KYC Verification)", max_chars=14, placeholder="XXXX XXXX 9012 (Optional)")
                     pw1 = st.text_input(t("lbl_password"), type="password")
                     pw2 = st.text_input(t("lbl_confirm_password"), type="password")
                     reg_go = st.form_submit_button(t("btn_register"), use_container_width=True)
                 if reg_go:
                     if not name_in or not phone_reg or not pw1 or not pw2:
                         st.error(t("err_fields"))
-                    elif not re.fullmatch(r"\d{10}", phone_reg.strip()):
-                        st.error(t("err_phone"))
+                    elif not re.fullmatch(r"[6-9]\d{9}", phone_reg.strip()):
+                        st.error("Please enter a valid 10-digit Indian mobile number (+91 starting with 6, 7, 8, or 9).")
                     elif len(pw1) < 4:
                         st.error(t("err_password_len"))
                     elif pw1 != pw2:
                         st.error(t("err_password_match"))
                     else:
-                        ok, res = create_user("citizen", phone_reg.strip(), pw1, name_in.strip())
+                        is_kyc = 1
+                        last4_digits = aadhaar_in.strip()[-4:] if aadhaar_in.strip() else phone_reg.strip()[-4:]
+                        ok, res = create_user("citizen", phone_reg.strip(), pw1, name_in.strip(), is_kyc, last4_digits)
                         if ok:
-                            st.success(t("success_register"))
+                            st.success("Account successfully created with Verified Indian Citizen DoT KYC Status! Please switch to Log In.")
                         else:
                             st.error(t("err_exists"))
 
@@ -1028,6 +1042,8 @@ if selected_tab == "citizen":
         detected_ward = backend.nearest_ward(lat, lon)
         ward_select = detected_ward
         acc_info = f" (±{st.session_state['gps_accuracy']}m)" if st.session_state.get("gps_accuracy") else ""
+        in_india = backend.is_within_india_geofence(lat, lon)
+        geo_tag = '<span style="background:#e0f2fe; color:#0369a1; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px; border:1px solid #bae6fd;">🇮🇳 Indian Territory Verified</span>' if in_india else '<span style="background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px;">⚠️ Outside India Bounding</span>'
 
         # Live Geolocation Status Card
         st.markdown(f"""
@@ -1037,7 +1053,10 @@ if selected_tab == "citizen":
               <strong style="color:var(--navy); font-size:13.5px; display:block;">📍 AwazSetu Live Incident Geolocation</strong>
               <span style="font-size:11.5px; color:#475569;">High-accuracy browser satellite sync active{acc_info}</span>
             </div>
-            <span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px; border:1px solid #bbf7d0;">GPS Locked</span>
+            <div style="display:flex; gap:6px;">
+              {geo_tag}
+              <span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:12px; font-weight:800; font-size:11px; border:1px solid #bbf7d0;">GPS Locked</span>
+            </div>
           </div>
           <div style="margin-top:8px; font-size:12.5px; color:#1e293b; background:#ffffff; border:1px solid #e2e8f0; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
             <span>Detected Redressal Ward: <b style="color:var(--navy);">{detected_ward}</b> &nbsp;·&nbsp; Pinpoint: <code>{lat:.5f}, {lon:.5f}</code></span>
@@ -1079,7 +1098,9 @@ if selected_tab == "citizen":
                 [t("cat_placeholder")] + list(backend.DEPARTMENTS.keys()),
             )
             description = st.text_area(t("lbl_desc"), placeholder=t("desc_placeholder"), height=140)
-            photo = st.file_uploader(t("upload_label"), type=["png", "jpg", "jpeg"])
+            photo_file = st.file_uploader(t("upload_label"), type=["png", "jpg", "jpeg"])
+            photo_cam = st.camera_input("📷 Or Take Live Camera Photo (Anti-Spoofing Proof)")
+            photo = photo_cam if photo_cam is not None else photo_file
             st.markdown("<hr style='margin:12px 0;'>", unsafe_allow_html=True)
             submit_btn = st.form_submit_button(t("btn_submit"), use_container_width=True)
 

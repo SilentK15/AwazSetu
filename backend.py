@@ -185,6 +185,11 @@ def nearest_ward(lat, lon):
     return best_ward or "Dadar Central"
 
 
+def is_within_india_geofence(lat: float, lon: float) -> bool:
+    # Sovereign territory of India: 6.7°N to 37.6°N, 68.7°E to 97.4°E
+    return 6.7 <= lat <= 37.6 and 68.7 <= lon <= 97.4
+
+
 def embed_text(text: str):
     model = load_embedding_model()
     if model is not None:
