@@ -68,7 +68,7 @@ class CivicRequestHandler(SimpleHTTPRequestHandler):
 
             embedding = backend.embed_text(text_en)
             existing_records = backend.fetch_all_records()
-            parent_id, sim = backend.find_duplicate_match(embedding, lat, lon, existing_records)
+            parent_id, sim = backend.find_duplicate_match(embedding, lat, lon, existing_records, new_dept=department)
 
             severity_score, priority, xai_priority = backend.score_priority(text_en, sentiment, upvotes=0)
             gid = f"CG-{backend.new_id()}"

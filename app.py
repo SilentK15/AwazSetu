@@ -1132,9 +1132,12 @@ if selected_tab == "citizen":
 
                 embedding = backend.embed_text(text_en)
                 existing_records = backend.fetch_all_records()
-                parent_id, sim = backend.find_duplicate_match(embedding, lat, lon, existing_records)
+                parent_id, sim = backend.find_duplicate_match(embedding, lat, lon, existing_records, new_dept=department)
 
-                severity_score, priority, xai_priority = backend.score_priority(text_en, sentiment, upvotes=0)
+                photo_bytes = photo.getvalue() if photo is not None else None
+                severity_score, priority, xai_priority = backend.score_priority(
+                    text_en, sentiment, upvotes=0, has_photo=(photo is not None), photo_bytes=photo_bytes
+                )
                 gid = f"CG-{backend.new_id()}"
 
                 record = {
