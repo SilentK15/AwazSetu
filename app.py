@@ -811,8 +811,16 @@ def render_header():
     # Identity Bar
     user = st.session_state.get("auth_user")
     if user:
-        role_class = "admin" if st.session_state.get("auth_role") == "admin" else ""
-        role_label = t("role_admin_tag") if st.session_state.get("auth_role") == "admin" else t("role_citizen_tag")
+        if st.session_state.get("auth_role") == "admin":
+            role_class = "admin"
+            admin_d = st.session_state.get("auth_dept")
+            if admin_d and admin_d != "All Departments (Central City Oversight)":
+                role_label = f"🏛️ {admin_d} Officer"
+            else:
+                role_label = "🏛️ Central Operations Admin"
+        else:
+            role_class = ""
+            role_label = t("role_citizen_tag")
         initial = (user.get("full_name") or user.get("username") or "?")[:1].upper()
         name_display = user.get("full_name") or user.get("username")
         right_html = f'<div class="user-chip"><div class="avatar">{initial}</div><div><strong style="font-size:12px; color:var(--navy); display:block;">{name_display}</strong><span class="role-pill {role_class}">{role_label}</span></div></div>'
@@ -910,6 +918,11 @@ def render_auth_page():
         with role_tab_admin:
             st.caption(t("admin_login_desc"))
             with st.form("admin_login_form"):
+                dept_in = st.selectbox(
+                    "🏛️ Select Department Authority",
+                    ["All Departments (Central City Oversight)"] + list(backend.DEPARTMENTS.keys()),
+                    help="Select your designated municipal department to manage grievances specifically assigned to your domain."
+                )
                 uname_in = st.text_input(t("lbl_username"), placeholder="admin")
                 apw_in = st.text_input(t("lbl_password"), type="password")
                 ago = st.form_submit_button(t("btn_login"), use_container_width=True)
@@ -921,6 +934,7 @@ def render_auth_page():
                     if user:
                         st.session_state["auth_user"] = user
                         st.session_state["auth_role"] = "admin"
+                        st.session_state["auth_dept"] = dept_in
                         st.session_state["active_tab"] = "dashboard"
                         st.rerun()
                     else:
@@ -1263,7 +1277,15 @@ elif selected_tab == "track":
 # VIEW: AUTHORITY OPERATIONS DASHBOARD (Admin Only)
 # =============================================================================
 elif selected_tab == "dashboard":
-    records = backend.fetch_all_records()
+    all_records = backend.fetch_all_records()
+    admin_dept = st.session_state.get("auth_dept", "All Departments (Central City Oversight)")
+    is_scoped = bool(admin_dept and admin_dept != "All Departments (Central City Oversight)")
+
+    if is_scoped:
+        records = [r for r in all_records if r["department"] == admin_dept]
+    else:
+        records = all_records
+
     total = len(records)
     pending = sum(1 for r in records if r["status"] == "Pending")
     in_prog = sum(1 for r in records if r["status"] == "In Progress")
@@ -1271,12 +1293,22 @@ elif selected_tab == "dashboard":
     resolved = sum(1 for r in records if r["status"] == "Resolved")
     res_rate = (resolved / total * 100) if total > 0 else 0.0
 
+    scope_banner = ""
+    if is_scoped:
+        scope_banner = f"""
+        <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-left:5px solid #2563eb; padding:10px 16px; border-radius:8px; margin:8px 0 14px 0;">
+          <strong style="color:#1e40af; font-size:13.5px; display:block;">🏛️ Department Authority Scope: {admin_dept}</strong>
+          <span style="font-size:11.5px; color:#475569;">Grievance oversight, density heatmaps, and priority resolution queues are filtered exclusively for your department.</span>
+        </div>
+        """
+
     st.markdown(f"""
-    <div style="margin:4px 0 14px 0;">
+    <div style="margin:4px 0 10px 0;">
       <div class="section-kicker">{t("dash_kicker")}</div>
       <h2 style="color:var(--navy); font-size:24px; font-weight:800; margin:2px 0 4px 0;">{t("dash_title")}</h2>
       <p style="color:var(--text-muted); font-size:12.5px; margin:0;">Real-time incident oversight, GIS density heatmap, and grievance redressal controls.</p>
     </div>
+    {scope_banner}
     """, unsafe_allow_html=True)
 
     # 4 Essential Operational KPIs
@@ -1287,7 +1319,10 @@ elif selected_tab == "dashboard":
     k4.metric(t("kpi_resolved"), resolved, f"{res_rate:.1f}% Resolved")
 
     if not records:
-        st.info("No citizen complaints recorded in the system yet. Once submitted, live tickets and heatmap clusters will appear here.")
+        if is_scoped:
+            st.info(f"No complaints currently recorded under **{admin_dept}**. Any newly routed or matching complaints will appear here automatically.")
+        else:
+            st.info("No citizen complaints recorded in the system yet. Once submitted, live tickets and heatmap clusters will appear here.")
     else:
         st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
 
@@ -1361,21 +1396,34 @@ elif selected_tab == "dashboard":
         # ---------------- 2. RESOLUTION QUEUE & TICKET ACTION CENTER ----------------
         st.markdown("#### 📋 Incident Resolution Queue & Actions")
 
-        f_col1, f_col2, f_col3 = st.columns([1.2, 1.2, 1.6])
-        with f_col1:
-            dept_filter = st.selectbox("Filter Department", ["All Departments"] + list(backend.DEPARTMENTS.keys()), key="adm_dept_filter")
-        with f_col2:
-            status_filter = st.selectbox("Filter Status", ["Active Only (Pending & In Progress)", "All Statuses", "Pending", "In Progress", "Resolved"], index=0, key="adm_status_filter")
-        with f_col3:
-            search_ticket = st.text_input("Search ID or Keyword", placeholder="Ticket #, description, ward...", key="adm_search_box")
+        if is_scoped:
+            f_col1, f_col2 = st.columns([1.5, 2])
+            with f_col1:
+                status_filter = st.selectbox("Filter Status", ["Active Only (Pending & In Progress)", "All Statuses", "Pending", "In Progress", "Resolved"], index=0, key="adm_status_filter")
+            with f_col2:
+                search_ticket = st.text_input("Search ID or Keyword", placeholder="Ticket #, description, ward...", key="adm_search_box")
 
-        filtered_records = records
-        if dept_filter != "All Departments":
-            filtered_records = [r for r in filtered_records if r["department"] == dept_filter]
-        if status_filter == "Active Only (Pending & In Progress)":
-            filtered_records = [r for r in filtered_records if r["status"] != "Resolved"]
-        elif status_filter != "All Statuses":
-            filtered_records = [r for r in filtered_records if r["status"] == status_filter]
+            filtered_records = records
+            if status_filter == "Active Only (Pending & In Progress)":
+                filtered_records = [r for r in filtered_records if r["status"] != "Resolved"]
+            elif status_filter != "All Statuses":
+                filtered_records = [r for r in filtered_records if r["status"] == status_filter]
+        else:
+            f_col1, f_col2, f_col3 = st.columns([1.2, 1.2, 1.6])
+            with f_col1:
+                dept_filter = st.selectbox("Filter Department", ["All Departments"] + list(backend.DEPARTMENTS.keys()), key="adm_dept_filter")
+            with f_col2:
+                status_filter = st.selectbox("Filter Status", ["Active Only (Pending & In Progress)", "All Statuses", "Pending", "In Progress", "Resolved"], index=0, key="adm_status_filter")
+            with f_col3:
+                search_ticket = st.text_input("Search ID or Keyword", placeholder="Ticket #, description, ward...", key="adm_search_box")
+
+            filtered_records = records
+            if dept_filter != "All Departments":
+                filtered_records = [r for r in filtered_records if r["department"] == dept_filter]
+            if status_filter == "Active Only (Pending & In Progress)":
+                filtered_records = [r for r in filtered_records if r["status"] != "Resolved"]
+            elif status_filter != "All Statuses":
+                filtered_records = [r for r in filtered_records if r["status"] == status_filter]
         if search_ticket:
             q = search_ticket.lower().strip()
             filtered_records = [
