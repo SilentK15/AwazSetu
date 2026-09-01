@@ -232,19 +232,19 @@ TRANSLATIONS = {
         "tab_login": "Log In",
         "tab_register": "New Registration",
         "lbl_fullname": "Full name",
-        "lbl_phone": "Registered mobile number",
+        "lbl_phone": "🇮🇳 Indian Mobile Number (+91)",
         "lbl_username": "Username",
         "lbl_password": "Password",
         "lbl_confirm_password": "Confirm password",
         "btn_login": "Log In",
         "btn_register": "Create Account",
-        "citizen_login_desc": "Log in with your registered mobile number to submit and track grievances.",
-        "citizen_register_desc": "Create an AwazSetu citizen account to submit and track your grievances.",
+        "citizen_login_desc": "Log in with your registered 10-digit Indian mobile number (+91).",
+        "citizen_register_desc": "Create a verified citizen account using your 10-digit Indian mobile number.",
         "admin_login_desc": "Authorised personnel only. Log in to access the operations dashboard.",
         "err_fields": "Please fill in all required fields.",
         "err_invalid": "Incorrect username/mobile number or password.",
         "err_exists": "An account with this mobile number already exists. Please log in instead.",
-        "err_phone": "Please enter a valid 10-digit mobile number.",
+        "err_phone": "⚠️ Please enter a valid 10-digit Indian mobile number (+91 starting with 6, 7, 8, or 9).",
         "err_password_len": "Password must be at least 4 characters.",
         "err_password_match": "Passwords do not match.",
         "success_register": "Account created successfully. Please log in below.",
@@ -331,19 +331,19 @@ TRANSLATIONS = {
         "tab_login": "लॉग इन करें",
         "tab_register": "नया पंजीकरण",
         "lbl_fullname": "पूरा नाम",
-        "lbl_phone": "पंजीकृत मोबाइल नंबर",
+        "lbl_phone": "🇮🇳 10-अंकीय भारतीय मोबाइल (+91)",
         "lbl_username": "उपयोगकर्ता नाम",
         "lbl_password": "पासवर्ड",
         "lbl_confirm_password": "पासवर्ड की पुष्टि करें",
         "btn_login": "लॉग इन करें",
         "btn_register": "खाता बनाएं",
-        "citizen_login_desc": "शिकायत दर्ज करने और ट्रैक करने के लिए अपने पंजीकृत मोबाइल नंबर से लॉग इन करें।",
-        "citizen_register_desc": "शिकायत दर्ज करने और ट्रैक करने के लिए आवाज़सेतु नागरिक खाता बनाएं।",
+        "citizen_login_desc": "शिकायत दर्ज करने और ट्रैक करने के लिए अपने पंजीकृत 10-अंकीय भारतीय मोबाइल नंबर (+91) से लॉग इन करें।",
+        "citizen_register_desc": "शिकायत दर्ज करने के लिए अपना 10-अंकीय भारतीय मोबाइल नंबर दर्ज करें।",
         "admin_login_desc": "केवल अधिकृत कर्मियों के लिए। संचालन डैशबोर्ड तक पहुँचने के लिए लॉग इन करें।",
         "err_fields": "कृपया सभी आवश्यक फ़ील्ड भरें।",
         "err_invalid": "गलत उपयोगकर्ता नाम/मोबाइल नंबर या पासवर्ड।",
         "err_exists": "इस मोबाइल नंबर से पहले से खाता मौजूद है। कृपया लॉग इन करें।",
-        "err_phone": "कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें।",
+        "err_phone": "⚠️ कृपया एक मान्य 10-अंकीय भारतीय मोबाइल नंबर दर्ज करें (6, 7, 8, या 9 से शुरू होने वाला)।",
         "err_password_len": "पासवर्ड कम से कम 4 अक्षरों का होना चाहिए।",
         "err_password_match": "पासवर्ड मेल नहीं खाते।",
         "success_register": "खाता सफलतापूर्वक बनाया गया। कृपया नीचे लॉग इन करें।",
@@ -430,19 +430,19 @@ TRANSLATIONS = {
         "tab_login": "लॉग इन",
         "tab_register": "नवीन नोंदणी",
         "lbl_fullname": "पूर्ण नाव",
-        "lbl_phone": "नोंदणीकृत मोबाइल क्रमांक",
+        "lbl_phone": "🇮🇳 10-अंकी भारतीय मोबाईल (+91)",
         "lbl_username": "वापरकर्तानाव",
         "lbl_password": "पासवर्ड",
         "lbl_confirm_password": "पासवर्डची पुष्टी करा",
         "btn_login": "लॉग इन",
         "btn_register": "खाते तयार करा",
-        "citizen_login_desc": "तक्रार नोंदवण्यासाठी आणि ट्रॅक करण्यासाठी नोंदणीकृत मोबाइल क्रमांकाने लॉग इन करा.",
-        "citizen_register_desc": "तक्रार नोंदवण्यासाठी आणि ट्रॅक करण्यासाठी नागरिक खाते तयार करा.",
+        "citizen_login_desc": "तक्रार नोंदवण्यासाठी आणि ट्रॅक करण्यासाठी 10-अंकी भारतीय मोबाईल क्रमांकाने (+91) लॉग इन करा.",
+        "citizen_register_desc": "तक्रार नोंदवण्यासाठी तुमचा 10-अंकी भारतीय मोबाईल क्रमांक वापरा.",
         "admin_login_desc": "केवळ अधिकृत कर्मचाऱ्यांसाठी. संचालन डॅशबोर्डमध्ये प्रवेशासाठी लॉग इन करा.",
         "err_fields": "कृपया सर्व आवश्यक माहिती भरा.",
         "err_invalid": "चुकीचे वापरकर्तानाव/मोबाइल क्रमांक किंवा पासवर्ड.",
         "err_exists": "या मोबाइल क्रमांकासह आधीच खाते अस्तित्वात आहे. कृपया लॉग इन करा.",
-        "err_phone": "कृपया वैध 10-अंकी मोबाइल क्रमांक टाका.",
+        "err_phone": "⚠️ कृपया वैध 10-अंकी भारतीय मोबाईल क्रमांक टाका (6, 7, 8, किंवा 9 ने सुरू होणारा).",
         "err_password_len": "पासवर्ड किमान 4 अक्षरांचा असावा.",
         "err_password_match": "पासवर्ड जुळत नाहीत.",
         "success_register": "खाते यशस्वीरित्या तयार झाले. कृपया खाली लॉग इन करा.",
@@ -862,14 +862,17 @@ def render_auth_page():
             with sub_login:
                 st.caption(t("citizen_login_desc"))
                 with st.form("citizen_login_form"):
-                    phone_in = st.text_input(t("lbl_phone"), max_chars=10, placeholder="9820012345")
+                    phone_in = st.text_input(t("lbl_phone"), max_chars=14, placeholder="e.g. 9820012345")
                     pw_in = st.text_input(t("lbl_password"), type="password")
                     go = st.form_submit_button(t("btn_login"), use_container_width=True)
                 if go:
+                    raw_login = phone_in.strip().replace(" ", "").replace("-", "").replace("+91", "").lstrip("0")
                     if not phone_in or not pw_in:
                         st.error(t("err_fields"))
                     else:
-                        user = authenticate("citizen", phone_in.strip(), pw_in)
+                        user = authenticate("citizen", raw_login, pw_in)
+                        if not user:
+                            user = authenticate("citizen", phone_in.strip(), pw_in)
                         if user:
                             st.session_state["auth_user"] = user
                             st.session_state["auth_role"] = "citizen"
@@ -882,23 +885,24 @@ def render_auth_page():
                 st.caption(t("citizen_register_desc"))
                 with st.form("citizen_register_form"):
                     name_in = st.text_input(t("lbl_fullname"))
-                    phone_reg = st.text_input(t("lbl_phone"), max_chars=10, placeholder="9820012345")
+                    phone_reg = st.text_input(t("lbl_phone"), max_chars=14, placeholder="e.g. 9820012345 (10-digit Indian Mobile)")
                     pw1 = st.text_input(t("lbl_password"), type="password")
                     pw2 = st.text_input(t("lbl_confirm_password"), type="password")
                     reg_go = st.form_submit_button(t("btn_register"), use_container_width=True)
                 if reg_go:
+                    clean_phone = phone_reg.strip().replace(" ", "").replace("-", "").replace("+91", "").lstrip("0")
                     if not name_in or not phone_reg or not pw1 or not pw2:
                         st.error(t("err_fields"))
-                    elif not re.fullmatch(r"\d{10}", phone_reg.strip()):
+                    elif not re.fullmatch(r"[6-9]\d{9}", clean_phone):
                         st.error(t("err_phone"))
                     elif len(pw1) < 4:
                         st.error(t("err_password_len"))
                     elif pw1 != pw2:
                         st.error(t("err_password_match"))
                     else:
-                        ok, res = create_user("citizen", phone_reg.strip(), pw1, name_in.strip())
+                        ok, res = create_user("citizen", clean_phone, pw1, name_in.strip())
                         if ok:
-                            st.success(t("success_register"))
+                            st.success(f"✓ Indian Mobile (+91 {clean_phone}) Verified! {t('success_register')}")
                         else:
                             st.error(t("err_exists"))
 
