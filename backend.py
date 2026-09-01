@@ -380,9 +380,19 @@ def insert_record(record: dict):
     conn.close()
 
 
+def delete_record_from_db(gid: str):
+    conn = get_conn()
+    conn.execute("DELETE FROM grievances WHERE id = ? OR parent_id = ?", (gid, gid))
+    conn.commit()
+    conn.close()
+
+
 def update_status_in_db(gid: str, status: str):
     conn = get_conn()
-    conn.execute("UPDATE grievances SET status = ? WHERE id = ? OR parent_id = ?", (status, gid, gid))
+    if status == "Resolved":
+        conn.execute("DELETE FROM grievances WHERE id = ? OR parent_id = ?", (gid, gid))
+    else:
+        conn.execute("UPDATE grievances SET status = ? WHERE id = ? OR parent_id = ?", (status, gid, gid))
     conn.commit()
     conn.close()
 

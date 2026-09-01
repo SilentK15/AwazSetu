@@ -1447,14 +1447,16 @@ elif selected_tab == "dashboard":
                 with act2:
                     if st.button("Update", key=f"btn_upd_{tid}", use_container_width=True):
                         backend.update_status_in_db(tid, new_status)
-                        st.success(f"Ticket #{tid} updated to '{new_status}'!")
+                        if new_status == "Resolved":
+                            st.success(f"Ticket #{tid} resolved and deleted from active queue!")
+                        else:
+                            st.success(f"Ticket #{tid} updated to '{new_status}'!")
                         st.rerun()
                 with act3:
-                    if r["status"] != "Resolved":
-                        if st.button("Mark Resolved", key=f"btn_res_{tid}", use_container_width=True):
-                            backend.update_status_in_db(tid, "Resolved")
-                            st.success(f"Ticket #{tid} marked as Resolved!")
-                            st.rerun()
+                    if st.button("Mark Resolved", key=f"btn_res_{tid}", use_container_width=True):
+                        backend.update_status_in_db(tid, "Resolved")
+                        st.success(f"Ticket #{tid} resolved and removed from queue!")
+                        st.rerun()
 
                 with st.expander(f"View AI Diagnostic & Routing Reason (#{tid})"):
                     st.markdown(r["xai_department"])
