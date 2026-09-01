@@ -1417,6 +1417,14 @@ elif selected_tab == "dashboard":
                             for cr in child_reports:
                                 st.markdown(f"- **#{cr['id']}**: *\"{cr['original_text']}\"* (Reporter: {cr.get('citizen_name', 'Citizen')} - `{cr.get('citizen_phone')}`, {cr['created_at'][:16].replace('T', ' ')})")
 
+                # Mandatory Resolution Proof Upload
+                res_photo = st.file_uploader(
+                    f"📸 Upload Resolution Proof Photo (Mandatory to Resolve #{tid})",
+                    type=["png", "jpg", "jpeg"],
+                    key=f"proof_photo_{tid}",
+                    help="Physical evidence of work completion is strictly required by municipal audit protocol to close this ticket."
+                )
+
                 # Action bar per ticket
                 act1, act2, act3 = st.columns([1.5, 1, 1])
                 with act1:
@@ -1429,17 +1437,23 @@ elif selected_tab == "dashboard":
                     )
                 with act2:
                     if st.button("Update", key=f"btn_upd_{tid}", use_container_width=True):
-                        backend.update_status_in_db(tid, new_status)
-                        if new_status == "Resolved":
-                            st.success(f"Ticket #{tid} resolved and deleted from active queue!")
+                        if new_status == "Resolved" and res_photo is None:
+                            st.error(f"⚠️ Mandatory Resolution Proof Required: You must attach a photo of the completed work before marking Ticket #{tid} as Resolved!")
                         else:
-                            st.success(f"Ticket #{tid} updated to '{new_status}'!")
-                        st.rerun()
+                            backend.update_status_in_db(tid, new_status)
+                            if new_status == "Resolved":
+                                st.success(f"Ticket #{tid} verified with resolution proof and deleted from active queue!")
+                            else:
+                                st.success(f"Ticket #{tid} updated to '{new_status}'!")
+                            st.rerun()
                 with act3:
                     if st.button("Mark Resolved", key=f"btn_res_{tid}", use_container_width=True):
-                        backend.update_status_in_db(tid, "Resolved")
-                        st.success(f"Ticket #{tid} resolved and removed from queue!")
-                        st.rerun()
+                        if res_photo is None:
+                            st.error(f"⚠️ Mandatory Resolution Proof Required: Please upload a photo showing the resolved issue before closing Ticket #{tid}!")
+                        else:
+                            backend.update_status_in_db(tid, "Resolved")
+                            st.success(f"Ticket #{tid} verified with resolution photo and closed!")
+                            st.rerun()
 
                 with st.expander(f"View AI Diagnostic & Routing Reason (#{tid})"):
                     st.markdown(r["xai_department"])
