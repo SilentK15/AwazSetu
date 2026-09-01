@@ -17,8 +17,6 @@ import math
 import uuid
 import sqlite3
 import random
-import re
-import secrets
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -185,69 +183,6 @@ def nearest_ward(lat, lon):
         if d < best_dist:
             best_dist, best_ward = d, name
     return best_ward or "Dadar Central"
-
-
-def is_within_india_geofence(lat: float, lon: float) -> bool:
-    # Sovereign territory of India: 6.7°N to 37.6°N, 68.7°E to 97.4°E
-    return 6.7 <= lat <= 37.6 and 68.7 <= lon <= 97.4
-
-
-# UIDAI Official Verhoeff Checksum Algorithm
-_VERHOEFF_D = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
-    [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
-    [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
-    [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
-    [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
-    [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
-    [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
-    [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
-    [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-]
-
-_VERHOEFF_P = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
-    [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
-    [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
-    [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
-    [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
-    [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
-    [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
-]
-
-
-def validate_aadhaar_verhoeff(aadhaar_num: str) -> bool:
-    """Validates 12-digit Indian Aadhaar number using official UIDAI Verhoeff Checksum."""
-    clean = re.sub(r"\s+", "", str(aadhaar_num))
-    if not re.fullmatch(r"\d{12}", clean) or clean[0] in ('0', '1'):
-        return False
-    c = 0
-    for i, digit in enumerate(reversed(clean)):
-        c = _VERHOEFF_D[c][_VERHOEFF_P[i % 8][int(digit)]]
-    return c == 0
-
-
-def verify_digilocker_kyc(identifier: str, otp: str = ""):
-    """Authenticates citizen against official DigiLocker / API Setu e-KYC specification."""
-    clean = re.sub(r"\s+", "", str(identifier))
-    if not (len(clean) == 12 or len(clean) == 10):
-        return {"success": False, "error": "Invalid format (Must be 12-digit Aadhaar or 10-digit Indian Mobile)"}
-    
-    # In live e-governance, calls API Setu DigiLocker OAuth2 endpoint
-    # For evaluation & demo, verifies OTP (or default demo OTP 1947 / 123456)
-    if otp and otp.strip() not in ("1947", "123456", "9999", "7777"):
-        return {"success": False, "error": "Invalid DigiLocker OTP entered. Please use official demo OTP '1947'."}
-    
-    return {
-        "success": True,
-        "kyc_id": f"DL-KYC-{secrets.token_hex(4).upper()}",
-        "issuer": "DigiLocker / UIDAI (Govt of India)",
-        "masked_uid": f"XXXX-XXXX-{clean[-4:]}",
-        "status": "AUTHENTIC_INDIAN_CITIZEN_VERIFIED",
-        "timestamp": datetime.now().isoformat()
-    }
 
 
 def embed_text(text: str):
