@@ -1234,6 +1234,11 @@ elif selected_tab == "track":
         if only_mine:
             records = my_records
         st.markdown("<div style='height:6px;'></div>", unsafe_allow_html=True)
+    elif role == "admin":
+        admin_dept = st.session_state.get("auth_dept", "All Departments (Central City Oversight)")
+        if admin_dept and admin_dept != "All Departments (Central City Oversight)":
+            records = [r for r in records if r["department"] == admin_dept]
+            st.markdown(f"<div class='section-kicker'>🏛️ {admin_dept} Department Complaints</div>", unsafe_allow_html=True)
 
     if not records:
         st.info(t("track_empty"))
