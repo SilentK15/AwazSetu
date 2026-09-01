@@ -1451,14 +1451,3 @@ elif selected_tab == "dashboard":
 
 
 
-
-# =============================================================================
-# FOOTER
-# =============================================================================
-st.markdown("""
-<hr style="margin:24px 0 14px 0;">
-<div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b;">
-  <span>© 2026 AwazSetu Civic Redressal Platform</span>
-  <span>Designed for accessible AI-driven public-service delivery</span>
-</div>
-""", unsafe_allow_html=True)
