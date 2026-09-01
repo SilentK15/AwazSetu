@@ -1232,31 +1232,20 @@ elif selected_tab == "track":
             )
             dup_tag = f"<span style='color:#a15c00; font-size:11px;'>[Merged into #{r['parent_id']}]</span>" if r['is_duplicate'] else ""
 
-            st.markdown(f"""
-            <div class="civic-card">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <div>
-                  <span style="font-weight:800; color:var(--navy); font-size:1.05rem;">#{r['id']}</span>
-                  &nbsp;·&nbsp; <b>{r['department']}</b> {dup_tag}
-                  &nbsp;·&nbsp; <span style="font-size:0.8rem; color:var(--muted);">Area: {r['ward']}</span>
-                </div>
-                <div>
-                  {status_badge}
-                  &nbsp;
-                  <span style="color:{p_color}; font-weight:700; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px;">
-                    {r['priority']} ({r['severity_score']}/100)
-                  </span>
-                </div>
-              </div>
-              <div style="color:var(--ink); font-size:0.9rem; margin-bottom:8px;">
-                "{r['original_text']}"
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted);">
-                <span>Reported: {r['created_at'][:16].replace('T', ' ')}</span>
-                <span>Community Confirmations: <b>{r['upvotes']}</b></span>
-              </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="civic-card">'
+                f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">'
+                f'<div><span style="font-weight:800; color:var(--navy); font-size:1.05rem;">#{r["id"]}</span> &nbsp;·&nbsp; <b>{r["department"]}</b> {dup_tag} &nbsp;·&nbsp; <span style="font-size:0.8rem; color:var(--muted);">Area: {r["ward"]}</span></div>'
+                f'<div>{status_badge} &nbsp;<span style="color:{p_color}; font-weight:700; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px;">{r["priority"]} ({r["severity_score"]}/100)</span></div>'
+                f'</div>'
+                f'<div style="color:var(--ink); font-size:0.9rem; margin-bottom:8px;">"{r["original_text"]}"</div>'
+                f'<div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted);">'
+                f'<span>Reported: {r["created_at"][:16].replace("T", " ")}</span>'
+                f'<span>Community Confirmations: <b>{r["upvotes"]}</b></span>'
+                f'</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
 
 # =============================================================================
@@ -1401,30 +1390,20 @@ elif selected_tab == "dashboard":
                 elif r.get("upvotes", 0) > 0:
                     dup_tag = f'<span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:4px; font-weight:800; font-size:10.5px; border:1px solid #bfdbfe; margin-left:6px;">👥 Master Ticket ({r.get("upvotes")} Merged Reports)</span>'
 
-                st.markdown(f"""
-                <div class="civic-card" style="border-left: 4px solid {p_color}; margin-bottom: 12px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                      <strong style="font-size:1.05rem; color:var(--navy);">#{tid}</strong>
-                      &nbsp;·&nbsp; <b>{r['department']}</b>
-                      &nbsp;·&nbsp; <span style="font-size:11.5px; color:var(--text-muted);">Area: {r['ward']}</span>
-                      {dup_tag}
-                    </div>
-                    <div>
-                      {st_badge}
-                      &nbsp;
-                      <span style="color:{p_color}; font-weight:800; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px; background:#ffffff;">
-                        {r['priority']} ({r['severity_score']}/100)
-                      </span>
-                    </div>
-                  </div>
-                  <p style="margin:8px 0; font-size:0.92rem; color:#1e293b;">"{r['original_text']}"</p>
-                  <div style="font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:6px;">
-                    <span>Reporter: <b>{r.get('citizen_name', 'Citizen')}</b> ({r.get('citizen_phone') or 'Direct'})</span>
-                    <span>Reported: {r['created_at'][:16].replace('T', ' ')} · Community Confirmations: <b>{r['upvotes']}</b></span>
-                  </div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="civic-card" style="border-left: 4px solid {p_color}; margin-bottom: 12px;">'
+                    f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">'
+                    f'<div><strong style="font-size:1.05rem; color:var(--navy);">#{tid}</strong> &nbsp;·&nbsp; <b>{r["department"]}</b> &nbsp;·&nbsp; <span style="font-size:11.5px; color:var(--text-muted);">Area: {r["ward"]}</span>{dup_tag}</div>'
+                    f'<div>{st_badge} &nbsp;<span style="color:{p_color}; font-weight:800; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px; background:#ffffff;">{r["priority"]} ({r["severity_score"]}/100)</span></div>'
+                    f'</div>'
+                    f'<p style="margin:8px 0; font-size:0.92rem; color:#1e293b;">"{r["original_text"]}"</p>'
+                    f'<div style="font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:4px;">'
+                    f'<span>Reporter: <b>{r.get("citizen_name", "Citizen")}</b> ({r.get("citizen_phone") or "Direct"})</span>'
+                    f'<span>Reported: {r["created_at"][:16].replace("T", " ")} · Community Confirmations: <b>{r["upvotes"]}</b></span>'
+                    f'</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
 
                 # Check if this master ticket has linked child duplicates
                 if r.get("is_duplicate") == 0 and r.get("upvotes", 0) > 0:
