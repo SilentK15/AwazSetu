@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AwazSetu — AI-Based Citizen Grievance Classification, Prioritization and Duplicate Detection">
+  <title>AwazSetu — Civic Grievance Redressal Portal</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="utility-bar">
+      <div class="container utility-inner">
+        <span id="txt-accessible-services">AwazSetu — Accessible Civic Grievance &amp; Redressal Service</span>
+        <div class="utility-actions" aria-label="Accessibility and language controls">
+          <button type="button" onclick="adjustFontSize(-1)">A-</button>
+          <button type="button" class="lang-active" onclick="adjustFontSize(0)">A</button>
+          <button type="button" onclick="adjustFontSize(1)">A+</button>
+          <span class="utility-divider"></span>
+          <button type="button" id="btn-lang-en" class="lang-active" onclick="setLanguage('en')">English</button>
+          <button type="button" id="btn-lang-hi" onclick="setLanguage('hi')">हिंदी</button>
+          <button type="button" id="btn-lang-mr" onclick="setLanguage('mr')">मराठी</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="identity-bar">
+      <div class="container identity-inner">
+        <div class="emblem-placeholder" aria-label="Civic emblem">
+          <span>AS</span>
+        </div>
+        <div class="brand-copy">
+          <div class="eyebrow" id="txt-eyebrow">AWAZSETU · CITIZEN SERVICE PLATFORM</div>
+          <h1 id="txt-portal-title">AwazSetu</h1>
+          <p id="txt-portal-subtitle">AI-Powered Civic Grievance Classification, Prioritization & Redressal</p>
+        </div>
+        <div class="header-status">
+          <span class="status-dot"></span>
+          <div>
+            <strong id="txt-portal-status">Portal Status</strong>
+            <small id="txt-services-op">Services operational</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tricolor-rule" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+
+    <nav class="main-nav" aria-label="Primary navigation">
+      <div class="container nav-inner">
+        <a class="nav-link active" id="nav-citizen" onclick="switchView('citizen')">Citizen Portal</a>
+        <a class="nav-link" id="nav-track" onclick="switchView('track')">Track Complaint</a>
+        <a class="nav-link" id="nav-dashboard" onclick="switchView('dashboard')">Authority Dashboard</a>
+        <a class="nav-link" id="nav-how" onclick="switchView('how')">How It Works</a>
+        <div class="nav-spacer"></div>
+        <button class="outline-btn" id="nav-role-badge" onclick="switchView('dashboard')">Authority View</button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- VIEW 1: CITIZEN REGISTRATION PORTAL -->
+    <div id="view-citizen">
+      <section class="hero-section">
+        <div class="container">
+          <div class="breadcrumb">Home <span>/</span> Citizen Services <span>/</span> <span id="txt-crumb">Register Grievance</span></div>
+
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <div class="section-kicker" id="txt-hero-kicker">CITIZEN GRIEVANCE SERVICE</div>
+              <h2 id="txt-hero-title">Report a civic issue in a few simple steps.</h2>
+              <p id="txt-hero-desc">
+                Submit a complaint with location and description. Intelligent AI routing
+                directs the issue to the appropriate service team and merges duplicate reports.
+              </p>
+              <div class="hero-points">
+                <div><span>✓</span> <span id="txt-point-1">Multilingual complaint submission</span></div>
+                <div><span>✓</span> <span id="txt-point-2">Similar complaint detection (400m)</span></div>
+                <div><span>✓</span> <span id="txt-point-3">Transparent priority explanation (XAI)</span></div>
+              </div>
+            </div>
+
+            <div class="service-summary">
+              <div class="summary-header">
+                <div>
+                  <strong id="txt-summary-title">New Grievance</strong>
+                  <small id="txt-summary-sub">Secure citizen submission</small>
+                </div>
+              </div>
+              <div class="summary-row"><span id="txt-sum-time">Estimated completion</span><strong>2–3 min</strong></div>
+              <div class="summary-row"><span id="txt-sum-req">Required fields</span><strong>4</strong></div>
+              <div class="summary-row"><span id="txt-sum-loc">Location services</span><strong class="green-text" id="txt-loc-status">Active</strong></div>
+            </div>
+          </div>
+
+          <div class="stepper" aria-label="Grievance submission progress">
+            <div class="step active" id="step-node-1"><span>1</span><div><strong id="txt-st-1">Issue</strong><small id="txt-st-1-s">Describe problem</small></div></div>
+            <div class="step-line"></div>
+            <div class="step" id="step-node-2"><span>2</span><div><strong id="txt-st-2">Location</strong><small id="txt-st-2-s">Pin affected area</small></div></div>
+            <div class="step-line"></div>
+            <div class="step" id="step-node-3"><span>3</span><div><strong id="txt-st-3">Analysis</strong><small id="txt-st-3-s">AI verification</small></div></div>
+            <div class="step-line"></div>
+            <div class="step" id="step-node-4"><span>4</span><div><strong id="txt-st-4">Submit</strong><small id="txt-st-4-s">Receive ticket ID</small></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="container form-layout">
+          <div class="form-column">
+            <div class="card form-card">
+              <div class="card-title-row">
+                <div>
+                  <span class="section-kicker" id="txt-step-kicker">STEP 01 & 02</span>
+                  <h3 id="txt-form-heading">Describe the civic issue</h3>
+                </div>
+                <span class="required-note" id="txt-req-note">* Required</span>
+              </div>
+
+              <!-- Location Selector -->
+              <div class="field">
+                <label id="lbl-loc-mode">Location Acquisition Method <span>*</span></label>
+                <div class="loc-btn-group">
+                  <button type="button" class="loc-toggle-btn active" id="btn-loc-gps" onclick="setLocMode('gps')">📍 Use My Location (GPS)</button>
+                  <button type="button" class="loc-toggle-btn" id="btn-loc-preset" onclick="setLocMode('preset')">🏢 Area / Landmark</button>
+                  <button type="button" class="loc-toggle-btn" id="btn-loc-map" onclick="setLocMode('map')">🗺️ Click on Map</button>
+                  <button type="button" class="loc-toggle-btn" id="btn-loc-manual" onclick="setLocMode('manual')">🔢 Coordinates</button>
+                </div>
+
+                <div id="gps-action-box" class="gps-box">
+                  <div>
+                    <strong id="gps-status-title">Browser Geolocation</strong>
+                    <span id="gps-coords-display">Click to request device GPS coordinates.</span>
+                  </div>
+                  <button type="button" class="outline-btn" onclick="requestBrowserGPS()" id="btn-trigger-gps">📍 Detect Location</button>
+                </div>
+
+                <div id="preset-select-box" style="display:none; margin-bottom:12px;">
+                  <select id="preset-landmark-dropdown" onchange="onPresetChange()">
+                    <option value="Dadar TT Circle">Dadar TT Circle (19.0178, 72.8478)</option>
+                    <option value="Andheri Station (W)">Andheri Station West (19.1197, 72.8464)</option>
+                    <option value="Bandra Bandstand">Bandra Bandstand (19.0450, 72.8200)</option>
+                    <option value="Kurla LBS Road">Kurla LBS Road (19.0726, 72.8793)</option>
+                    <option value="Borivali Station (W)">Borivali Station West (19.2307, 72.8567)</option>
+                    <option value="Colaba Causeway">Colaba Causeway (18.9067, 72.8147)</option>
+                  </select>
+                </div>
+
+                <div id="manual-coords-box" style="display:none; margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                  <div>
+                    <label style="font-size:10px; font-weight:700;">Latitude</label>
+                    <input type="number" id="input-lat" step="0.000001" value="19.0760">
+                  </div>
+                  <div>
+                    <label style="font-size:10px; font-weight:700;">Longitude</label>
+                    <input type="number" id="input-lon" step="0.000001" value="72.8777">
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="category" id="lbl-cat">Issue category</label>
+                <select id="category">
+                  <option value="Not sure / Let AI decide" id="opt-cat-ai">Not sure / Let AI decide</option>
+                  <option value="Roads & Infrastructure">Roads & Infrastructure</option>
+                  <option value="Water Supply">Water Supply</option>
+                  <option value="Electricity/Power">Electricity/Power</option>
+                  <option value="Waste Management">Waste Management</option>
+                  <option value="Public Health">Public Health</option>
+                </select>
+                <small id="txt-cat-help">Choose a category or let the SentenceTransformers engine classify automatically.</small>
+              </div>
+
+              <div class="field">
+                <label for="description" id="lbl-desc">What is the problem? <span>*</span></label>
+                <textarea id="description" rows="5" placeholder="Describe what you observed, where it is happening, and any details that may help resolve the issue."></textarea>
+                <div class="field-footer"><small id="txt-lang-note">You may write in English, हिंदी or मराठी.</small><span id="char-count">0 / 1000</span></div>
+              </div>
+
+              <div class="field">
+                <label for="ward" id="lbl-ward">Administrative area / Ward <span>*</span></label>
+                <select id="ward">
+                  <option value="Dadar Central">Dadar Central</option>
+                  <option value="Andheri West">Andheri West</option>
+                  <option value="Bandra Promenade">Bandra Promenade</option>
+                  <option value="Kurla Junction">Kurla Junction</option>
+                  <option value="Borivali North">Borivali North</option>
+                  <option value="Colaba Point">Colaba Point</option>
+                </select>
+              </div>
+
+              <div class="upload-box">
+                <div class="upload-icon">↑</div>
+                <div>
+                  <strong id="txt-upload-title">Attach supporting photo or document</strong>
+                  <p id="txt-upload-sub">Optional · JPG, PNG · Up to 10 MB</p>
+                </div>
+                <input type="file" id="photo-upload" style="display:none;" onchange="onPhotoSelected(event)">
+                <button type="button" class="outline-btn" onclick="document.getElementById('photo-upload').click()" id="btn-choose-file">Choose File</button>
+              </div>
+              <div id="file-name-preview" style="font-size:11px; color:#16a34a; margin-top:4px;"></div>
+
+              <div class="form-actions">
+                <button type="button" class="primary-btn" id="btn-submit-complaint" onclick="submitGrievance()">
+                  <span id="txt-submit-btn">Submit Grievance →</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="side-column">
+            <div class="card intelligence-card">
+              <div class="ai-heading">
+                <div class="ai-symbol">✦</div>
+                <div>
+                  <span class="section-kicker" id="txt-intel-kicker">INTELLIGENT ASSISTANCE</span>
+                  <h3 id="txt-intel-title">Complaint analysis</h3>
+                </div>
+              </div>
+              <p class="muted" id="txt-intel-desc">
+                As you describe your issue, the system identifies its likely category,
+                urgency and checks for nearby duplicate complaints.
+              </p>
+
+              <div class="analysis-item">
+                <div class="analysis-label"><span id="txt-ai-engine">AI Engine Status</span><strong>SentenceTransformers Online</strong></div>
+              </div>
+              <div class="analysis-item">
+                <div class="analysis-label"><span id="txt-geo-radius">Geospatial Deduplication</span><strong>400m Radius Active</strong></div>
+              </div>
+
+              <div id="live-ai-preview" style="display:none; margin-top:10px; background:#f8fafc; padding:10px; border-radius:4px; border:1px solid #e2e8f0; font-size:11px;">
+                <!-- Filled after submission -->
+              </div>
+            </div>
+
+            <div class="card info-card">
+              <div class="info-icon">i</div>
+              <div>
+                <h4 id="txt-priv-title">Your privacy matters</h4>
+                <p id="txt-priv-desc">Only information needed to process and resolve the grievance is submitted. Avoid sharing passwords or sensitive personal data.</p>
+              </div>
+            </div>
+
+            <div class="help-panel">
+              <span id="txt-help-kicker">Need assistance?</span>
+              <strong id="txt-help-title">Citizen Help & Support</strong>
+              <p id="txt-help-desc">Civic Incident Helpline: 1916 | Emergency: 112</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Duplicate Alert Banner (Populates when duplicate is merged) -->
+      <div id="duplicate-result-banner" class="container duplicate-section" style="display:none;">
+        <div class="duplicate-banner">
+          <div class="warning-symbol">!</div>
+          <div>
+            <strong id="txt-dup-banner-title">Similar issues reported nearby</strong>
+            <p id="dup-banner-text">We found a matching complaint within 400m. Your report has been merged as an upvote to elevate its resolution priority.</p>
+          </div>
+          <button class="outline-btn" onclick="switchView('track')">View in Tracking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: TRACK COMPLAINT -->
+    <div id="view-track" style="display:none;" class="container content-section">
+      <div class="dashboard-header">
+        <div>
+          <span class="section-kicker" id="txt-track-kicker">LIVE CITIZEN FEED</span>
+          <h2 id="txt-track-title">Track Complaint & Live Status</h2>
+          <p id="txt-track-sub">Real-time status updates directly from the municipal redressal database.</p>
+        </div>
+        <button class="outline-btn" onclick="loadAllGrievances()">↻ Refresh</button>
+      </div>
+
+      <div id="citizen-tickets-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- VIEW 3: AUTHORITY OPERATIONS DASHBOARD -->
+    <div id="view-dashboard" style="display:none;" class="dashboard-section">
+      <div class="container">
+        <div class="dashboard-header">
+          <div>
+            <span class="section-kicker" id="txt-dash-kicker">AUTHORITY OPERATIONS</span>
+            <h2 id="txt-dash-title">Service Operations Dashboard</h2>
+            <p id="txt-dash-sub">Monitor real citizen grievance volume, priority queues, locations and resolution progress.</p>
+          </div>
+          <div class="dashboard-controls">
+            <select id="filter-ward" onchange="applyAdminFilters()">
+              <option value="All">All Areas</option>
+              <option value="Dadar Central">Dadar Central</option>
+              <option value="Andheri West">Andheri West</option>
+              <option value="Bandra Promenade">Bandra Promenade</option>
+              <option value="Kurla Junction">Kurla Junction</option>
+              <option value="Borivali North">Borivali North</option>
+              <option value="Colaba Point">Colaba Point</option>
+            </select>
+            <button class="outline-btn" onclick="loadAllGrievances()">↻ Refresh</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card"><span id="kpi-lbl-total">Total complaints</span><strong id="kpi-total-val">0</strong><small class="positive">Live complaints</small></div>
+          <div class="kpi-card"><span id="kpi-lbl-pending">Pending review</span><strong id="kpi-pending-val">0</strong><small>Needs attention</small></div>
+          <div class="kpi-card"><span id="kpi-lbl-high">High / Critical</span><strong id="kpi-high-val">0</strong><small class="urgent">Priority queue</small></div>
+          <div class="kpi-card"><span id="kpi-lbl-resolved">Resolved</span><strong id="kpi-resolved-val">0</strong><small class="positive" id="kpi-res-rate">0% resolution rate</small></div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card map-card">
+            <div class="card-title-row">
+              <div><span class="section-kicker" id="txt-gis-kicker">GEOSPATIAL INTELLIGENCE</span><h3 id="txt-map-title">Complaint density map</h3></div>
+              <span class="live-badge"><i></i> Live GIS Feed</span>
+            </div>
+            <div id="mapbox-container"></div>
+          </div>
+
+          <div class="card queue-card">
+            <div class="card-title-row">
+              <div><span class="section-kicker" id="txt-queue-kicker">PRIORITY QUEUE</span><h3 id="txt-queue-title">Needs attention</h3></div>
+            </div>
+
+            <div id="admin-queue-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-strip">
+          <div><span id="txt-str-dup">Duplicate complaints merged</span><strong id="analytics-dup-reduction">0%</strong><small>via SentenceTransformers</small></div>
+          <div><span id="txt-str-resp">Average first response</span><strong>3h 18m</strong><small>across active queues</small></div>
+          <div><span id="txt-str-clust">Active issue clusters</span><strong id="analytics-cluster-count">0</strong><small>1 km radius DSU graph</small></div>
+          <div><span id="txt-str-upv">Citizen confirmations</span><strong id="analytics-upvote-count">0</strong><small>linked to primary issues</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: HOW IT WORKS -->
+    <div id="view-how" style="display:none;" class="how-section">
+      <div class="container">
+        <div class="section-heading">
+          <span class="section-kicker">WORKFLOW ARCHITECTURE</span>
+          <h2>From complaint to resolution</h2>
+          <p>A transparent workflow keeps citizens informed and helps service teams focus on the issues that matter most.</p>
+        </div>
+        <div class="workflow-grid">
+          <div><span>01</span><h3>Submit</h3><p>Describe the civic issue and provide coordinates.</p></div>
+          <div><span>02</span><h3>Analyse</h3><p>SentenceTransformers classify, prioritize and detect 400m duplicates.</p></div>
+          <div><span>03</span><h3>Route</h3><p>Directly assigned to the relevant department operational queue.</p></div>
+          <div><span>04</span><h3>Resolve</h3><p>Authority updates status with instant citizen tracking reflection.</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Ticket Detail Modal -->
+  <div id="ticket-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-ticket-id">Ticket Details</h3>
+        <button class="close-modal-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-content">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div><strong>AwazSetu Civic Redressal Portal</strong><p>A digital public-service interface for transparent civic issue reporting and resolution.</p></div>
+      <div><strong>Citizen Services</strong><a onclick="switchView('citizen')">Register Grievance</a><a onclick="switchView('track')">Track Complaint</a></div>
+      <div><strong>Accessibility</strong><a href="#">Accessibility Statement</a><a href="#">Privacy Notice</a><a href="#">Help & Support</a></div>
+    </div>
+    <div class="container footer-bottom"><span>© 2026 AwazSetu Civic Platform</span><span>Designed for accessible public-service delivery</span></div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

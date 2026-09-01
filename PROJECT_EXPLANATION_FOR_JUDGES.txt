@@ -1,0 +1,380 @@
+========================================================================================
+                      AWAZSETU (आवाज़सेतु) — SIH 2026 COMPLETE MASTER GUIDE
+      AI-Based Citizen Grievance Classification, Prioritization & Duplicate Detection
+========================================================================================
+
+PROJECT SUMMARY IN 30 SECONDS (ELEVATOR PITCH FOR JUDGES):
+"AwazSetu is an end-to-end AI-powered civic grievance redressal and operations platform. 
+Instead of traditional portals where complaints get dumped into massive unorganized queues, 
+AwazSetu does three intelligent things in under 1.5 seconds upon submission:
+1. Semantic AI Classification: Automatically routes the complaint to the exact municipal department 
+   using SentenceTransformers (all-MiniLM-L6-v2) in English, Hindi, and Marathi.
+2. Dynamic Urgency & Priority Scoring with Explainable AI (XAI): Calculates an objective 0–100 
+   severity score combining keyword hazard weights, VADER sentiment polarity, and photo evidence, 
+   producing a human-readable audit trail explaining WHY a ticket was marked Critical, High, or Medium.
+3. 400m Semantic Duplicate Detection: Computes spatial Haversine distance (<400m) and Cosine 
+   Similarity (>0.80) to detect and merge duplicate reports into a single parent ticket, elevating 
+   its priority instead of creating ticket backlogs and duplicate field visits."
+
+----------------------------------------------------------------------------------------
+TABLE OF CONTENTS:
+1. PROBLEM STATEMENT & MOTIVATION
+2. SYSTEM ARCHITECTURE & DATA FLOW
+3. DETAILED AI & MATHEMATICAL MODELS (EXACT FORMULAS)
+   - 3.1 Multilingual Normalization
+   - 3.2 SentenceTransformer Embeddings & Semantic Routing
+   - 3.3 400m Spatio-Temporal Duplicate Detection (Haversine + Cosine)
+   - 3.4 Multi-Factor Urgency Priority Scoring (0-100 Formula)
+   - 3.5 Explainable AI (XAI) Engine
+4. GEOSPATIAL & MAPBOX GIS HEATMAP ARCHITECTURE
+5. CITIZEN & AUTHORITY WORKFLOWS (STEP-BY-STEP)
+6. DATABASE SCHEMA & SECURITY
+7. TOP 20 QUESTIONS JUDGES WILL ASK & WINNING ANSWERS
+----------------------------------------------------------------------------------------
+
+========================================================================================
+1. PROBLEM STATEMENT & MOTIVATION
+========================================================================================
+The Core Problem with Existing Municipal Grievance Portals (CPGRAMS, BMC, Swachhata):
+- Ticket Flooding: When a water main breaks or a major pothole appears, 50 citizens report 
+  the same issue. Traditional portals create 50 separate tickets, clogging the queue and 
+  dispatching multiple inspection teams to the same spot.
+- Incorrect Routing: Citizens often select the wrong department dropdown (e.g. selecting 
+  "Sanitation" for a leaking sewer pipe instead of "Water Supply & Sewerage"). Tickets bounce 
+  between departments for weeks.
+- Lack of Urgency Differentiation: First-Come-First-Serve queues treat an open manhole on 
+  a school road with the same priority as a non-functioning streetlight in an empty park.
+- Black-Box AI: Officials do not trust automated routing unless the system explains *why* 
+  a ticket was assigned or prioritized.
+
+AwazSetu's Solution:
+- Solves all 4 problems using lightweight, low-latency, on-device AI algorithms without 
+  expensive cloud API dependencies or manual human sorting.
+
+========================================================================================
+2. SYSTEM ARCHITECTURE & DATA FLOW
+========================================================================================
+
+[ Citizen Input ] (Text in EN/HI/MR + Device GPS + Photo)
+       │
+       ▼
+[ Language Normalization ] ──► Detects Hindi/Marathi/English ──► Translates to English
+       │
+       ├─────────────────────────────────────────────────────────────┐
+       ▼                                                             ▼
+[ SentenceTransformers ]                                     [ VADER Sentiment ]
+(all-MiniLM-L6-v2: 384-dim Dense Vector)                     (Compound polarity score: -1 to +1)
+       │                                                             │
+       ├──────────────────────────────┐                              │
+       ▼                              ▼                              │
+[ Semantic Routing ]      [ 400m Duplicate Check ]                   │
+Department Match          (Haversine <= 400m AND                     │
+(Cosine Sim vs Archetypes) Cosine Similarity >= 0.80)                │
+       │                              │                              │
+       │              ┌───────────────┴───────────────┐              │
+       │              ▼                               ▼              │
+       │      [ DUPLICATE FOUND ]             [ UNIQUE TICKET ]      │
+       │      Merge as Upvote (+8 pts)        Create New Ticket ID   │
+       │              │                               │              │
+       └──────────────┼───────────────────────────────┴──────────────┘
+                      ▼
+         [ Dynamic Priority Engine (0-100) ]
+         Dept Base + Urgency Triggers + Sentiment + Photo (+10) + Upvotes
+                      │
+                      ▼
+         [ Explainable AI (XAI) Generator ]
+         (Generates full breakdown for Citizen & Admin)
+                      │
+                      ▼
+         [ SQLite Persistent Storage ]
+         (Instant DB Commit: Pending -> In Progress -> Resolved)
+                      │
+         ┌────────────┴────────────┐
+         ▼                         ▼
+   [ Citizen Live Track ]    [ Authority Operations ]
+   - Live Status Badge       - Mapbox Incident Heatmap
+   - Ticket Timeline         - 1-Click Status Redressal
+   - XAI Model Inspector     - Filtered Department Queue
+
+
+========================================================================================
+3. DETAILED AI & MATHEMATICAL MODELS (EXACT FORMULAS)
+========================================================================================
+
+----------------------------------------------------------------------------------------
+3.1 MULTILINGUAL NORMALIZATION
+----------------------------------------------------------------------------------------
+- Goal: Allow citizens to write in their native language (Hindi, Marathi, or English).
+- Implementation: 
+  - Detects Devanagari Unicode script range (\u0900-\u097F).
+  - Uses localized translation dictionaries and fallback normalization pipelines to translate 
+    regional terms (e.g., 'गंदगी', 'कचरा', 'खड्डा', 'पाणी गळती', 'विजेचा खांब') into normalized English.
+- Why?: Standardizes inputs so the SentenceTransformer model can perform cross-lingual semantic matching accurately.
+
+----------------------------------------------------------------------------------------
+3.2 SENTENCE-TRANSFORMERS & SEMANTIC EMBEDDINGS
+----------------------------------------------------------------------------------------
+- Model: `all-MiniLM-L6-v2` (SentenceTransformers framework).
+- Architecture: 6-layer MiniLM transformer with 22.7 million parameters.
+- Embedding Dimension: 384 dimensions.
+- Inference Speed: ~15 milliseconds on standard CPU (zero GPU needed).
+- Department Classification:
+  1. Solid Waste Management (Garbage, trash overflow, dead animals, illegal dumping)
+  2. Roads & Traffic Infrastructure (Potholes, broken asphalt, traffic signal dead, footpaths)
+  3. Water Supply & Sewerage (Pipeline burst, contaminated drinking water, open sewer)
+  4. Public Health & Sanitation (Mosquito breeding, stagnant water, dengue/malaria risk)
+  5. Electricity & Street Lighting (Streetlight blackouts, exposed live wire, sparking box)
+
+----------------------------------------------------------------------------------------
+3.3 400-METRE SPATIO-TEMPORAL DUPLICATE DETECTION (HAVERSINE + COSINE SIMILARITY)
+----------------------------------------------------------------------------------------
+When a complaint is submitted at (lat1, lon1) with embedding vector E1:
+The system queries all active complaints from SQLite and applies a two-tier filter:
+
+Step A: Spatial Proximity via Haversine Formula:
+   a = sin²(Δlat / 2) + cos(lat1) * cos(lat2) * sin²(Δlon / 2)
+   c = 2 * atan2(√a, √(1 - a))
+   Distance d = R * c   (where R = 6,371,000 meters)
+
+   Condition: d <= 400 meters. (If distance > 400m, skip immediately).
+
+Step B: Semantic Similarity via Cosine Distance:
+   Cosine Similarity(E1, E2) = (E1 • E2) / (||E1|| * ||E2||)
+
+   Condition: Cosine Similarity >= 0.80 (80% semantic match).
+
+Outcome:
+- If BOTH conditions match: The new complaint is classified as a DUPLICATE.
+- Action: It is linked as a child to the Parent Ticket (`parent_id = P001`), and adds +1 community confirmation upvote to the parent, bumping its urgency score by +8 points without clogging the authority queue.
+
+----------------------------------------------------------------------------------------
+3.4 DYNAMIC PRIORITY & URGENCY SCORING FORMULA (0 - 100 SCALE)
+----------------------------------------------------------------------------------------
+Priority is calculated using a multi-factor deterministic equation:
+
+Severity Score = Base_Score 
+                 + Sentiment_Penalty 
+                 + Hazard_Keyword_Bonus 
+                 + Photo_Evidence_Bonus 
+                 + Duplicate_Upvote_Bonus
+
+Parameters:
+1. Base Score (by Department Risk):
+   - Public Health / Electricity: 38 points
+   - Water & Sewerage / Roads: 34 points
+   - Solid Waste: 30 points
+
+2. Sentiment Penalty (VADER Polarity Compound Score: -1.0 to +1.0):
+   - Extreme Negative (-1.0 to -0.6): +15 points (high citizen distress)
+   - Moderate Negative (-0.6 to -0.2): +8 points
+   - Neutral / Mild (-0.2 to +1.0): 0 points
+
+3. Hazard Keyword Triggers:
+   - Level 1 Hazard ("accident", "sparking", "death", "hospital", "children", "fire", "emergency"): +22 points
+   - Level 2 Hazard ("overflow", "dengue", "dark", "school", "elderly", "blocked"): +12 points
+
+4. Photo Evidence Flag:
+   - Photo Attached: +10 points (verified physical evidence)
+
+5. Community Confirmations (Upvotes / Merged Duplicates):
+   - +8 points per confirmation (capped at +24 points)
+
+Priority Categorization:
+- 80 to 100 points: CRITICAL (Red SLA: <12 Hours)
+- 60 to 79 points:  HIGH     (Orange SLA: <24 Hours)
+- 40 to 59 points:  MEDIUM   (Yellow SLA: <48 Hours)
+- 0 to 39 points:   LOW      (Green SLA: <72 Hours)
+
+----------------------------------------------------------------------------------------
+3.5 EXPLAINABLE AI (XAI) ENGINE
+----------------------------------------------------------------------------------------
+Unlike black-box neural networks, AwazSetu generates transparent, plain-text reasoning:
+Example XAI Output shown to Admin & Citizen:
+  "• Base Department Urgency: Solid Waste Management (30 pts)
+   • Sentiment Distress: High negative polarity (-0.78) -> +15 pts
+   • Trigger Keywords: Found hazard terms ['overflow', 'school'] -> +12 pts
+   • Physical Evidence: Image uploaded -> +10 pts
+   • Community Weight: 2 citizen upvotes -> +16 pts
+   • Final Urgency Score: 83/100 -> CRITICAL Priority Assigned"
+
+
+========================================================================================
+4. GEOSPATIAL & MAPBOX GIS HEATMAP ARCHITECTURE
+========================================================================================
+- Mapbox Vector & Raster Integration:
+  - Powered by Mapbox Streets v12 style with authentic API access token.
+  - High-DPI 512px vector-rendered map tiles.
+- Citizen View:
+  - Real-time HTML5 browser GPS lock (`streamlit_js_eval.get_geolocation`) captures exact device 
+    latitude/longitude coordinates with accuracy radius (±m).
+  - Displays interactive Mapbox pinpoint map and 400m duplicate radius circle.
+  - Automatically resolves nearest municipal administrative ward (e.g., Dadar, Kurla, Andheri).
+- Authority View:
+  - Dynamic Incident Density Heatmap using kernel density estimation (KDE).
+  - Thermal intensity: Blue (Low) -> Green -> Yellow -> Red (High Concentration).
+  - Thermal weight is mathematically driven by: (Severity Score + Upvotes * 5).
+  - Interactive clickable markers with ticket status, department, and direct resolution popups.
+
+
+========================================================================================
+5. CITIZEN & AUTHORITY WORKFLOWS
+========================================================================================
+
+Citizen Workflow:
+1. Sign in via Mobile Number OTP/Password (or register in 5 seconds).
+2. Write grievance in English, Hindi, or Marathi (or upload a photo).
+3. Live GPS automatically locks device coordinates and ward name.
+4. Click "Submit Grievance":
+   - If unique: Receives instant Ticket ID (#CG-XXXX) with XAI reasoning.
+   - If duplicate within 400m: Merged into existing ticket with notification.
+5. Track complaint lifecycle under "Track Complaint" with live status badges.
+
+Authority Workflow:
+1. Log in with secure administrative credentials (`admin` / `admin123`).
+2. Dashboard presents 4 core KPIs: Total, Pending, High/Critical, and Resolution Rate %.
+3. Inspect the live Mapbox Incident Heatmap to spot geographic hotspots.
+4. Filter resolution queue by Department, Status (Pending, In Progress, Resolved), or Search.
+5. 1-Click Status Update or "Mark Resolved" button instantly commits to SQLite.
+
+
+========================================================================================
+6. DATABASE SCHEMA & SECURITY
+========================================================================================
+The platform uses two lightweight, zero-maintenance SQLite databases:
+
+1. `civic_grievance.db` (Table: `grievances`)
+   - `id` (TEXT, PK): e.g., 'CG-984210'
+   - `original_text` (TEXT): Raw input in native language
+   - `text_en` (TEXT): Normalized English text
+   - `detected_lang` (TEXT): 'en', 'hi', or 'mr'
+   - `department` (TEXT): Assigned department
+   - `ward` (TEXT): Municipal ward name
+   - `lat`, `lon` (REAL): GPS Coordinates
+   - `priority` (TEXT): 'Critical', 'High', 'Medium', 'Low'
+   - `severity_score` (INTEGER): 0 to 100
+   - `status` (TEXT): 'Pending', 'In Progress', 'Resolved'
+   - `upvotes` (INTEGER): Community confirmation count
+   - `is_duplicate` (INTEGER): 0 or 1
+   - `parent_id` (TEXT): Reference to parent ticket
+   - `embedding` (TEXT): Serialized 384-dimensional JSON vector
+   - `xai_department` (TEXT): Explainability text for routing
+   - `xai_priority` (TEXT): Explainability text for scoring
+   - `image_flag` (INTEGER): 0 or 1
+   - `citizen_phone` (TEXT): Reporter phone number
+   - `created_at` (TEXT): ISO timestamp
+
+2. `civic_users.db` (Table: `users`)
+   - `id` (TEXT, PK), `role` (TEXT), `username` (TEXT), `password_hash` (TEXT), `salt` (TEXT), `full_name` (TEXT)
+   - Passwords hashed using SHA-256 with unique 16-character cryptographic hex salts.
+
+
+========================================================================================
+7. TOP 20 QUESTIONS JUDGES WILL ASK & WINNING ANSWERS
+========================================================================================
+
+Q1: "How does your duplicate detection work?"
+A1: "We use a two-tier spatial-semantic algorithm. First, we compute the Haversine distance 
+between the new complaint and all existing complaints in the database. If distance is within 
+400 meters, we compute Cosine Similarity between their 384-dimensional SentenceTransformer 
+embeddings. If similarity exceeds 0.80, it is flagged as a duplicate, linked to the parent ticket, 
+and increments an upvote to elevate priority without creating redundant work orders."
+
+Q2: "Why 400 meters? What if an issue spans a larger area?"
+A2: "400 meters corresponds to the standard walkable radius (~5-minute walk) for localized civic 
+disturbances like garbage piles, potholes, or broken streetlights. For linear issues like 
+pipeline bursts, multiple clusters form along the line, which our Mapbox heatmap immediately 
+visualizes as a continuous thermal corridor."
+
+Q3: "What NLP model do you use for classification?"
+A3: "We use SentenceTransformers with the `all-MiniLM-L6-v2` architecture. It maps complaints 
+into a 384-dimensional dense semantic vector space. It runs in ~15ms on CPU, making it extremely 
+cost-efficient and lightweight for government deployment without requiring costly GPUs."
+
+Q4: "How do you handle Indian languages like Hindi and Marathi?"
+A4: "We have an automatic language detection and normalization pipeline. Hindi and Marathi 
+Devanagari inputs are detected via Unicode ranges and normalized into standardized English 
+representations before embedding, ensuring semantic consistency across diverse languages."
+
+Q5: "How is priority scored? Is it just random or heuristic?"
+A5: "It uses a deterministic 5-factor mathematical formula: Base Department Risk (30-38 pts) + 
+VADER Sentiment Distress (+0-15 pts) + Hazard Keywords (+12-22 pts) + Photo Evidence (+10 pts) + 
+Community Upvotes (+8 pts/upvote). The resulting 0–100 score maps into Critical, High, Medium, 
+and Low tiers with strict SLAs."
+
+Q6: "What is Explainable AI (XAI) in your portal and why is it important?"
+A6: "In government systems, officials cannot trust 'black-box' predictions. Our XAI engine 
+generates an exact breakdown of every point awarded (e.g. +15 for negative sentiment, +22 for 
+hazard keywords like 'sparking'). This creates total auditability for authorities and builds trust with citizens."
+
+Q7: "What happens when a citizen selects the wrong department?"
+A7: "The AI overrides the user's category hint based on semantic vector matching against 
+department archetypes. In the XAI log, it explicitly notes: 'Citizen selected Sanitation, 
+but AI classified as Roads & Traffic Infrastructure due to keyword pothole'."
+
+Q8: "How does the Mapbox Heatmap help municipal authorities?"
+A8: "The Heatmap uses kernel density estimation weighted by each ticket's severity score and upvotes. 
+Instead of looking at raw spreadsheets, authorities immediately see bright red hotspots where 
+critical clusters exist, allowing proactive dispatch of repair crews."
+
+Q9: "How do you obtain the citizen's location? What if GPS is denied?"
+A9: "We use HTML5 browser geolocation via `streamlit_js_eval`, which requests real-time device 
+satellite coordinates (latitude/longitude with accuracy in meters). If GPS permission is closed, 
+the system seamlessly falls back to administrative zone detection."
+
+Q10: "Is the data persistent or does it reset on server restart?"
+A10: "All complaints, embeddings, status changes, upvotes, and user accounts are permanently stored 
+in ACID-compliant SQLite databases (`civic_grievance.db` and `civic_users.db`). Status updates by 
+officials persist instantly across user sessions."
+
+Q11: "What prevents someone from spamming upvotes or fake complaints?"
+A11: "1) Users must be authenticated with mobile credentials. 2) Duplicate submissions within 
+400m are automatically merged as upvotes rather than new tickets. 3) Upvote score boosts are 
+capped at +24 points to prevent artificial inflation."
+
+Q12: "How scalable is this architecture?"
+A12: "SentenceTransformers embeddings are computed once on submission (15ms). SQLite easily handles 
+100,000+ records with indexed spatial queries. For national scale (millions of records), SQLite 
+can be swapped to PostgreSQL with PostGIS and pgvector in under 2 hours without altering any AI logic."
+
+Q13: "What role-based access control (RBAC) is implemented?"
+A13: "We maintain strict segregation: Citizens only see the submission form and their own tracked 
+tickets; Authorities have access to the Operations Dashboard, Mapbox Heatmap, and 1-Click Status 
+Redressal Controls. Passwords use SHA-256 with unique 16-character cryptographic salts."
+
+Q14: "Why did you build this in Streamlit instead of a heavy React/Node framework?"
+A14: "Streamlit enables 100% native Python execution, eliminating REST API overhead, serialization 
+delays, and multi-server desynchronization. The AI models, spatial math, database, and UI execute 
+in a single unified runtime with zero external server dependencies."
+
+Q15: "How does your system handle photos/images uploaded by citizens?"
+A15: "Uploaded photos serve two purposes: 1) Verified physical evidence adds +10 points to the 
+urgency score. 2) The photo is stored and displayed in both the Citizen Tracking card and 
+Authority Queue for visual inspection before dispatch."
+
+Q16: "What is your SLA (Service Level Agreement) strategy?"
+A16: "Critical (80-100 score) tickets trigger a 12-hour SLA with prominent visual badges. 
+High (60-79) has a 24-hour SLA. The admin queue automatically sorts unaddressed high-priority 
+tickets to the top of the queue."
+
+Q17: "Can a citizen track merged complaints?"
+A17: "Yes! When a citizen's complaint is merged into a parent ticket, they receive a confirmation 
+banner: 'Merged into Ticket #CG-XXXX (92.4% match)'. They can track the parent ticket's live resolution."
+
+Q18: "What happens when an admin marks a ticket as Resolved?"
+A18: "The database status changes from 'Pending' or 'In Progress' to 'Resolved'. The ticket is 
+removed from the active priority queue, its thermal weight on the heatmap diminishes, and the citizen 
+sees a green 'Resolved' status badge in real time."
+
+Q19: "How is AwazSetu different from existing apps like BMC 24x7 or Swachhata App?"
+A19: "Existing apps are passive forms connected to manual sorting queues. AwazSetu is an active AI 
+decision-support system with semantic auto-routing, dynamic multi-factor urgency scoring, 
+explainable AI audit logs, and automatic 400m spatial-semantic deduplication."
+
+Q20: "What is your roadmap for future enhancements?"
+A20: "1) Computer Vision pipeline (YOLOv8) to auto-verify pothole depth and garbage volume from photos. 
+2) WhatsApp Bot interface for complaint submission via voice notes. 3) Automated SMS notifications 
+to citizens upon ticket resolution."
+
+========================================================================================
+                          END OF MASTER JUDGES GUIDE
+========================================================================================
