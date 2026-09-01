@@ -890,17 +890,18 @@ def render_auth_page():
                             st.error(t("err_invalid"))
 
             with sub_register:
-                st.caption(t("citizen_register_desc"))
+                st.caption("Register an authentic Indian citizen account verified via DigiLocker / DoT e-KYC.")
                 with st.form("citizen_register_form"):
                     name_in = st.text_input(t("lbl_fullname"))
                     phone_reg = st.text_input(t("lbl_phone"), max_chars=10, placeholder="9820012345 (Indian DoT-KYC Mobile)")
-                    aadhaar_in = st.text_input("🇮🇳 12-Digit Aadhaar / DigiLocker ID (Instant e-KYC Verification)", max_chars=14, placeholder="XXXX XXXX 9012 (Optional)")
+                    aadhaar_in = st.text_input("🇮🇳 12-Digit Aadhaar / DigiLocker Citizen ID", max_chars=14, placeholder="12-digit UID (e.g. 5489 1234 5678)")
+                    otp_in = st.text_input("📲 DigiLocker Live e-KYC OTP (Demo: 1947)", max_chars=6, placeholder="Enter 6-digit OTP (Demo code: 1947)", help="Authenticates citizen identity through DigiLocker / API Setu specification")
                     pw1 = st.text_input(t("lbl_password"), type="password")
                     pw2 = st.text_input(t("lbl_confirm_password"), type="password")
                     reg_go = st.form_submit_button(t("btn_register"), use_container_width=True)
                 if reg_go:
-                    if not name_in or not phone_reg or not pw1 or not pw2:
-                        st.error(t("err_fields"))
+                    if not name_in or not phone_reg or not pw1 or not pw2 or not aadhaar_in or not otp_in:
+                        st.error("Please fill in all required fields including Aadhaar/DigiLocker ID and OTP.")
                     elif not re.fullmatch(r"[6-9]\d{9}", phone_reg.strip()):
                         st.error("Please enter a valid 10-digit Indian mobile number (+91 starting with 6, 7, 8, or 9).")
                     elif len(pw1) < 4:
@@ -908,13 +909,16 @@ def render_auth_page():
                     elif pw1 != pw2:
                         st.error(t("err_password_match"))
                     else:
-                        is_kyc = 1
-                        last4_digits = aadhaar_in.strip()[-4:] if aadhaar_in.strip() else phone_reg.strip()[-4:]
-                        ok, res = create_user("citizen", phone_reg.strip(), pw1, name_in.strip(), is_kyc, last4_digits)
-                        if ok:
-                            st.success("Account successfully created with Verified Indian Citizen DoT KYC Status! Please switch to Log In.")
+                        kyc_res = backend.verify_digilocker_kyc(aadhaar_in.strip(), otp_in.strip())
+                        if not kyc_res["success"]:
+                            st.error(kyc_res["error"])
                         else:
-                            st.error(t("err_exists"))
+                            last4_digits = aadhaar_in.strip()[-4:]
+                            ok, res = create_user("citizen", phone_reg.strip(), pw1, name_in.strip(), 1, last4_digits)
+                            if ok:
+                                st.success(f"✓ DigiLocker e-KYC Verified ({kyc_res['kyc_id']})! Account created as Authentic Indian Citizen. Please switch to Log In.")
+                            else:
+                                st.error(t("err_exists"))
 
         # ---------------- ADMIN AUTH ----------------
         with role_tab_admin:
