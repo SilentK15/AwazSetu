@@ -673,33 +673,105 @@ div[role="radiogroup"] label:has(input:checked) {
   background: var(--navy-tint) !important;
 }
 
-/* Auth Card */
+/* Auth Card & Tabs Alignment */
 .auth-box {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 4px 18px rgba(11,60,93,0.06);
-  padding: 24px 28px 20px 28px;
-  margin-top: 4px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(11,60,93,0.06);
+  padding: 24px 28px 16px 28px;
+  margin-top: 6px;
+  margin-bottom: 12px;
 }
-.auth-header { text-align: center; margin-bottom: 12px; }
+.auth-header { text-align: center; margin-bottom: 6px; }
 .auth-emblem {
-  width: 50px; height: 50px; margin: 0 auto 8px auto;
+  width: 52px; height: 52px; margin: 0 auto 10px auto;
   border: 2px solid var(--navy); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-family: "Noto Serif", serif; font-size: 20px; font-weight: 800;
   color: var(--navy) !important; background: var(--navy-tint);
+  box-shadow: 0 2px 8px rgba(11,60,93,0.08);
 }
 .auth-note {
   background: #fff8ec;
   border: 1px solid #f3d9ae;
   color: #7a4b00 !important;
   font-size: 11.5px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 6px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 .auth-note * { color: #7a4b00 !important; }
+
+/* Polished Full-Width Segmented Tab Navigation */
+div[data-testid="stTabs"] {
+  width: 100% !important;
+}
+div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+  display: flex !important;
+  width: 100% !important;
+  gap: 6px !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  padding: 0 0 2px 0 !important;
+  margin-bottom: 12px !important;
+}
+div[data-testid="stTabs"] [data-baseweb="tab"] {
+  flex: 1 1 0% !important;
+  text-align: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  color: #64748b !important;
+  padding: 10px 16px !important;
+  border-radius: 6px 6px 0 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+  margin-bottom: -2px !important;
+  transition: all 0.15s ease-in-out !important;
+}
+div[data-testid="stTabs"] [data-baseweb="tab"]:hover {
+  color: var(--navy) !important;
+  background: rgba(11,60,93,0.04) !important;
+}
+div[data-testid="stTabs"] [aria-selected="true"] {
+  color: var(--navy) !important;
+  font-weight: 800 !important;
+  border-bottom: 3px solid var(--navy) !important;
+  background: #f8fafc !important;
+}
+div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+  background-color: var(--navy) !important;
+  height: 3px !important;
+}
+div[data-testid="stTabs"] [data-baseweb="tab-border"] {
+  background-color: #e2e8f0 !important;
+}
+
+/* Sub-tabs within Auth (Level 2) */
+div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab-list"] {
+  background: #f1f5f9 !important;
+  border-radius: 8px !important;
+  padding: 4px !important;
+  border-bottom: none !important;
+  gap: 4px !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab"] {
+  border-radius: 6px !important;
+  padding: 7px 12px !important;
+  font-size: 12.5px !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] [aria-selected="true"] {
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  border-bottom: none !important;
+}
+div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+  display: none !important;
+}
 
 [data-testid="stMetricValue"] { color: var(--navy) !important; font-weight: 800 !important; }
 [data-testid="stMetricLabel"] { color: var(--text-muted) !important; font-weight: 700 !important; }
