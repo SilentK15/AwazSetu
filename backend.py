@@ -382,7 +382,7 @@ def insert_record(record: dict):
 
 def update_status_in_db(gid: str, status: str):
     conn = get_conn()
-    conn.execute("UPDATE grievances SET status = ? WHERE id = ?", (status, gid))
+    conn.execute("UPDATE grievances SET status = ? WHERE id = ? OR parent_id = ?", (status, gid, gid))
     conn.commit()
     conn.close()
 

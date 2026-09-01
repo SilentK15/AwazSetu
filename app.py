@@ -1159,10 +1159,20 @@ if selected_tab == "citizen":
                 if parent_id:
                     backend.increment_upvote_in_db(parent_id, boost_points=8)
 
-            st.success(f"Grievance Successfully Registered! Ticket ID: #{gid}")
+            st.success(f"Grievance Submission Processed! Ticket ID: #{gid}")
 
             if parent_id:
-                st.warning(f"Similar Issue Detected: Found matching complaint (Ticket #{parent_id}, {sim*100:.1f}% similarity) within 400m. Your report has been merged as an upvote to elevate its resolution priority!")
+                st.markdown(f"""
+                <div style="background:#eff6ff; border:1.5px solid #93c5fd; border-left:5px solid #2563eb; padding:14px 18px; border-radius:8px; margin:12px 0;">
+                  <strong style="color:#1e40af; font-size:14px; display:block;">🔄 Automated 400m Duplicate Grievance Match</strong>
+                  <p style="margin:4px 0 6px 0; font-size:12.5px; color:#1e293b;">
+                    A verified matching issue was already open within <b>400 meters</b> (Parent Ticket <b>#{parent_id}</b> with <b>{sim*100:.1f}% Semantic Match</b>).
+                  </p>
+                  <div style="font-size:11.5px; color:#1e40af; font-weight:700;">
+                    ✓ Merged into Master Ticket &nbsp;·&nbsp; ✓ +1 Community Confirmation Added &nbsp;·&nbsp; ✓ +8 Points Urgency Escalated
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Classified Department", department)
@@ -1369,8 +1379,8 @@ elif selected_tab == "dashboard":
                 if q in r["id"].lower() or q in r["original_text"].lower() or q in r["ward"].lower()
             ]
 
-        # Sort: unresolved high priority first
-        filtered_records.sort(key=lambda x: (x["status"] == "Resolved", -x.get("severity_score", 0)))
+        # Sort: unresolved high priority first, then parents before child duplicates
+        filtered_records.sort(key=lambda x: (x["status"] == "Resolved", x.get("is_duplicate", 0), -x.get("severity_score", 0)))
 
         if not filtered_records:
             st.info("No tickets match the selected filters.")
@@ -1385,6 +1395,12 @@ elif selected_tab == "dashboard":
                     else f'<span class="badge-resolved">Resolved</span>'
                 )
 
+                dup_tag = ""
+                if r.get("is_duplicate") == 1:
+                    dup_tag = f'<span style="background:#ede9fe; color:#5b21b6; padding:2px 8px; border-radius:4px; font-weight:800; font-size:10.5px; border:1px solid #ddd6fe; margin-left:6px;">🔗 Merged Duplicate ➔ #{r.get("parent_id")}</span>'
+                elif r.get("upvotes", 0) > 0:
+                    dup_tag = f'<span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:4px; font-weight:800; font-size:10.5px; border:1px solid #bfdbfe; margin-left:6px;">👥 Master Ticket ({r.get("upvotes")} Merged Reports)</span>'
+
                 st.markdown(f"""
                 <div class="civic-card" style="border-left: 4px solid {p_color}; margin-bottom: 12px;">
                   <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1392,6 +1408,7 @@ elif selected_tab == "dashboard":
                       <strong style="font-size:1.05rem; color:var(--navy);">#{tid}</strong>
                       &nbsp;·&nbsp; <b>{r['department']}</b>
                       &nbsp;·&nbsp; <span style="font-size:11.5px; color:var(--text-muted);">Area: {r['ward']}</span>
+                      {dup_tag}
                     </div>
                     <div>
                       {st_badge}
@@ -1408,6 +1425,14 @@ elif selected_tab == "dashboard":
                   </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+                # Check if this master ticket has linked child duplicates
+                if r.get("is_duplicate") == 0 and r.get("upvotes", 0) > 0:
+                    child_reports = [c for c in records if c.get("parent_id") == tid]
+                    if child_reports:
+                        with st.expander(f"👥 View {len(child_reports)} Linked Citizen Duplicate Report(s)"):
+                            for cr in child_reports:
+                                st.markdown(f"- **#{cr['id']}**: *\"{cr['original_text']}\"* (Reporter: {cr.get('citizen_name', 'Citizen')} - `{cr.get('citizen_phone')}`, {cr['created_at'][:16].replace('T', ' ')})")
 
                 # Action bar per ticket
                 act1, act2, act3 = st.columns([1.5, 1, 1])
