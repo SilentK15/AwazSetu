@@ -549,378 +549,499 @@ def compute_sla_badge(created_at_str: str, priority: str) -> str:
 
 
 # =============================================================================
-# DESIGN SYSTEM — CSS (Clean Public Service Aesthetic & Crisp Contrast)
+# DESIGN SYSTEM — CSS (Modern GovTech Civic Design System — Stitch AI Aligned)
 # =============================================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Serif:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --navy: #0b3c5d;
-  --navy-dark: #07263d;
-  --navy-tint: #f0f6fa;
-  --saffron: #ff9933;
-  --green: #138808;
-  --ink: #0f172a;
-  --text-main: #1e293b;
-  --text-muted: #475569;
-  --border: #cbd5e1;
-  --surface: #ffffff;
-  --bg: #f8fafc;
-  --radius: 8px;
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f1f5f9;
+  --ink-primary: #0f172a;
+  --ink-secondary: #334155;
+  --ink-muted: #64748b;
+  --border-subtle: #e2e8f0;
+  --blue-primary: #2563eb;
+  --blue-hover: #1d4ed8;
+  --blue-subtle: #eff6ff;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 9999px;
+  --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-float: 0 16px 32px -8px rgba(15, 23, 42, 0.09);
 }
 
 html, body, [data-testid="stAppViewContainer"] {
-  font-family: "Noto Sans", "Segoe UI", Arial, sans-serif !important;
-  background-color: var(--bg) !important;
-  color: var(--text-main) !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  background-color: var(--bg-app) !important;
+  color: var(--ink-primary) !important;
 }
 
 [data-testid="stSidebar"] { display: none !important; }
 #MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden !important; height: 0px !important; }
 
 .block-container {
-  padding-top: 0.8rem !important;
-  padding-bottom: 2.5rem !important;
-  max-width: 1140px !important;
+  padding-top: 0.9rem !important;
+  padding-bottom: 2.8rem !important;
+  max-width: 1200px !important;
 }
 
-/* Typography Contrast */
-h1, h2, h3, h4, h5, h6 { color: var(--navy) !important; font-weight: 800 !important; }
-p, li { color: var(--text-main) !important; line-height: 1.6; }
-label, .stMarkdown label, [data-testid="stWidgetLabel"] p { color: #0f172a !important; font-weight: 700 !important; font-size: 0.9rem !important; }
-small, .stCaption, caption { color: var(--text-muted) !important; }
-
-/* Utility Bar */
-.utility-bar {
-  background: var(--navy);
-  padding: 8px 16px;
-  border-radius: 6px 6px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11.5px;
-  color: #ffffff !important;
-}
-.utility-bar span, .utility-bar div { color: #ffffff !important; font-weight: 600; }
-
-/* Identity Bar */
-.identity-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: none;
-  padding: 16px 22px;
+/* Modern Header */
+.modern-header {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(11,60,93,0.04);
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-card);
 }
 
-.emblem-icon {
-  width: 46px; height: 46px;
-  border: 2px solid var(--navy);
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emblem-crest {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.18);
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.brand-subtitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+.header-right-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  background: #059669;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: "Noto Serif", serif;
-  font-size: 19px; font-weight: 800;
-  color: var(--navy) !important;
-  background: var(--navy-tint);
-  margin-right: 14px;
 }
 
-.tricolor-rule { display: flex; height: 3px; margin-bottom: 16px; }
-.tricolor-rule span:nth-child(1) { flex: 1; background: var(--saffron); }
-.tricolor-rule span:nth-child(2) { flex: 1; background: #ffffff; }
-.tricolor-rule span:nth-child(3) { flex: 1; background: var(--green); }
+.emergency-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.pulse-red {
+  width: 7px;
+  height: 7px;
+  background: #dc2626;
+  border-radius: 50%;
+  animation: pulse-ring 1.8s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 0.4; }
+  100% { transform: scale(0.9); opacity: 0.9; }
+}
 
 .user-chip {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--navy-tint);
-  border: 1px solid var(--border);
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-}
-.user-chip .avatar {
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--navy); color: #ffffff !important;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800;
-}
-.role-pill {
-  display: inline-block;
-  font-size: 10px; font-weight: 800; letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 2px 8px; border-radius: 999px;
-  background: #ffffff; color: var(--navy) !important;
-  border: 1px solid var(--border);
-}
-.role-pill.admin { background: #fff4e6; color: #9a5b00 !important; border-color: #f3d9ae; }
-
-/* Cards */
-.hero-box {
-  background: linear-gradient(180deg, #f0f6fa 0%, #ffffff 100%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px 26px;
-  margin-bottom: 18px;
-}
-
-.civic-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  box-shadow: 0 1px 3px rgba(11,60,93,0.04);
-  margin-bottom: 14px;
-}
-
-.section-kicker {
-  font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em;
-  color: var(--navy) !important; text-transform: uppercase;
-}
-
-/* Inputs & Form Controls */
-.stTextInput input, .stTextArea textarea, .stNumberInput input, .stPassword input {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border: 1.5px solid #94a3b8 !important;
-  border-radius: 6px !important;
-  font-size: 0.95rem !important;
-  font-weight: 500 !important;
-}
-.stTextInput input:focus, .stTextArea textarea:focus, .stNumberInput input:focus, .stPassword input:focus {
-  border-color: var(--navy) !important;
-  box-shadow: 0 0 0 3px rgba(11,60,93,0.18) !important;
-}
-div[data-baseweb="select"] > div {
-  background-color: #ffffff !important;
-  border: 1.5px solid #94a3b8 !important;
-  border-radius: 6px !important;
-}
-
-/* Primary Action Buttons */
-.stFormSubmitButton > button {
-  background: var(--navy) !important;
-  color: #ffffff !important;
-  border: 1px solid var(--navy) !important;
-  padding: 10px 22px !important;
-  font-weight: 800 !important;
-  border-radius: 6px !important;
-  font-size: 0.95rem !important;
-}
-.stFormSubmitButton > button:hover { background: var(--navy-dark) !important; color: #ffffff !important; }
-.stFormSubmitButton > button p { color: #ffffff !important; }
-
-/* Secondary Buttons */
-.stButton > button {
-  background: #ffffff !important;
-  color: var(--navy) !important;
-  border: 1.5px solid var(--border) !important;
-  padding: 7px 16px !important;
-  font-weight: 700 !important;
-  border-radius: 6px !important;
-  font-size: 0.88rem !important;
-}
-.stButton > button:hover { background: #f1f5f9 !important; border-color: var(--navy) !important; color: var(--navy) !important; }
-.stButton > button p { color: var(--navy) !important; font-weight: 700; }
-
-/* Badges */
-.badge-pending { background: #fee2e2; color: #991b1b !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fecaca; }
-.badge-progress { background: #fef3c7; color: #92400e !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fde68a; }
-.badge-waiting { background: #fef3c7; color: #b45309 !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fcd34d; }
-.badge-reopened { background: #ffedd5; color: #c2410c !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fed7aa; }
-.badge-resolved { background: #dcfce7; color: #166534 !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #bbf7d0; }
-
-/* Stepper */
-.stepper-strip {
   display: flex;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 18px;
-  margin-bottom: 16px;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 4px 12px 4px 4px;
+  border-radius: var(--radius-pill);
 }
 
-/* Nav Radios */
-div[role="radiogroup"] {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 6px;
-  gap: 4px !important;
-}
-div[role="radiogroup"] label {
-  border-radius: 6px;
-  padding: 8px 16px !important;
-  font-weight: 700 !important;
-  font-size: 0.88rem !important;
-}
-div[role="radiogroup"] label[data-checked="true"],
-div[role="radiogroup"] label:has(input:checked) {
-  background: var(--navy-tint) !important;
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
 }
 
-/* Auth Card & Tabs Alignment */
-.auth-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(11,60,93,0.06);
-  padding: 24px 28px 16px 28px;
-  margin-top: 6px;
+.badge-role-admin {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.badge-role-citizen {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Auth Card */
+.auth-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-float);
+  padding: 28px 30px 20px 30px;
+  margin-top: 8px;
   margin-bottom: 12px;
 }
-.auth-header { text-align: center; margin-bottom: 6px; }
-.auth-emblem {
-  width: 52px; height: 52px; margin: 0 auto 10px auto;
-  border: 2px solid var(--navy); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: "Noto Serif", serif; font-size: 20px; font-weight: 800;
-  color: var(--navy) !important; background: var(--navy-tint);
-  box-shadow: 0 2px 8px rgba(11,60,93,0.08);
-}
-.auth-note {
-  background: #fff8ec;
-  border: 1px solid #f3d9ae;
-  color: #7a4b00 !important;
-  font-size: 11.5px;
-  padding: 10px 14px;
-  border-radius: 6px;
-  margin-top: 12px;
-}
-.auth-note * { color: #7a4b00 !important; }
 
-/* Polished Full-Width Segmented Tab Navigation */
-div[data-testid="stTabs"] {
-  width: 100% !important;
+.auth-brand-section {
+  text-align: center;
 }
+
+.auth-emblem {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
+}
+
+.auth-kicker {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--blue-primary);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.auth-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--ink-primary);
+  margin: 0 0 4px;
+}
+
+.auth-subtitle {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+/* Modern Segmented Tabs */
 div[data-testid="stTabs"] [data-baseweb="tab-list"] {
-  display: flex !important;
-  width: 100% !important;
-  gap: 6px !important;
-  border-bottom: 2px solid #e2e8f0 !important;
-  padding: 0 0 2px 0 !important;
-  margin-bottom: 12px !important;
+  background: #f1f5f9 !important;
+  border-radius: var(--radius-pill) !important;
+  padding: 4px !important;
+  border: 1px solid #e2e8f0 !important;
+  gap: 4px !important;
+  margin-bottom: 14px !important;
 }
+
 div[data-testid="stTabs"] [data-baseweb="tab"] {
   flex: 1 1 0% !important;
   text-align: center !important;
   justify-content: center !important;
+  border-radius: var(--radius-pill) !important;
   font-weight: 700 !important;
-  font-size: 13.5px !important;
-  color: #64748b !important;
-  padding: 10px 16px !important;
-  border-radius: 6px 6px 0 0 !important;
+  font-size: 0.86rem !important;
+  color: var(--ink-secondary) !important;
+  padding: 8px 16px !important;
   background: transparent !important;
   border: none !important;
-  border-bottom: 3px solid transparent !important;
-  margin-bottom: -2px !important;
-  transition: all 0.15s ease-in-out !important;
+  transition: all 0.15s ease !important;
 }
+
 div[data-testid="stTabs"] [data-baseweb="tab"]:hover {
-  color: var(--navy) !important;
-  background: rgba(11,60,93,0.04) !important;
+  color: var(--ink-primary) !important;
 }
+
 div[data-testid="stTabs"] [aria-selected="true"] {
-  color: var(--navy) !important;
-  font-weight: 800 !important;
-  border-bottom: 3px solid var(--navy) !important;
-  background: #f8fafc !important;
+  background: var(--ink-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.18) !important;
 }
-div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
-  background-color: var(--navy) !important;
-  height: 3px !important;
-}
+
+div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
 div[data-testid="stTabs"] [data-baseweb="tab-border"] {
-  background-color: #e2e8f0 !important;
+  display: none !important;
 }
 
 /* Sub-tabs within Auth (Level 2) */
 div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab-list"] {
-  background: #f1f5f9 !important;
-  border-radius: 8px !important;
-  padding: 4px !important;
-  border-bottom: none !important;
-  gap: 4px !important;
-}
-div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab"] {
-  border-radius: 6px !important;
-  padding: 7px 12px !important;
-  font-size: 12.5px !important;
-  border-bottom: none !important;
-  margin-bottom: 0 !important;
-}
-div[data-testid="stTabs"] div[data-testid="stTabs"] [aria-selected="true"] {
   background: #ffffff !important;
-  color: var(--navy) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
-  border-bottom: none !important;
-}
-div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
-  display: none !important;
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 3px !important;
+  margin-bottom: 12px !important;
 }
 
-[data-testid="stMetricValue"] { color: var(--navy) !important; font-weight: 800 !important; }
-[data-testid="stMetricLabel"] { color: var(--text-muted) !important; font-weight: 700 !important; }
-hr { border-color: var(--border) !important; }
+div[data-testid="stTabs"] div[data-testid="stTabs"] [data-baseweb="tab"] {
+  padding: 6px 14px !important;
+  font-size: 0.8rem !important;
+}
+
+div[data-testid="stTabs"] div[data-testid="stTabs"] [aria-selected="true"] {
+  background: var(--blue-primary) !important;
+  color: #ffffff !important;
+}
+
+/* Navigation Radios (Main Views) */
+div[role="radiogroup"] {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: var(--radius-pill) !important;
+  padding: 4px !important;
+  display: inline-flex !important;
+  box-shadow: var(--shadow-card) !important;
+  gap: 4px !important;
+}
+
+div[role="radiogroup"] label {
+  border-radius: var(--radius-pill) !important;
+  padding: 8px 20px !important;
+  font-weight: 700 !important;
+  font-size: 0.86rem !important;
+  color: var(--ink-secondary) !important;
+  background: transparent !important;
+  border: none !important;
+  transition: all 0.15s ease !important;
+}
+
+div[role="radiogroup"] label[data-checked="true"],
+div[role="radiogroup"] label:has(input:checked) {
+  background: var(--ink-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
+}
+
+div[role="radiogroup"] label[data-checked="true"] p,
+div[role="radiogroup"] label:has(input:checked) p {
+  color: #ffffff !important;
+}
+
+/* Forms & Inputs */
+.stTextInput input, .stTextArea textarea, .stNumberInput input, .stPassword input {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+  padding: 10px 14px !important;
+}
+
+.stTextInput input:focus, .stTextArea textarea:focus, .stNumberInput input:focus, .stPassword input:focus {
+  border-color: var(--blue-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+}
+
+/* Primary Action Buttons */
+.stFormSubmitButton > button {
+  background: var(--blue-primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  font-size: 0.92rem !important;
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25) !important;
+}
+.stFormSubmitButton > button:hover {
+  background: var(--blue-hover) !important;
+}
+.stFormSubmitButton > button p { color: #ffffff !important; font-weight: 700; }
+
+/* Secondary Buttons */
+.stButton > button {
+  background: #ffffff !important;
+  color: var(--ink-primary) !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 8px 16px !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+}
+.stButton > button:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: var(--blue-primary) !important;
+}
+
+/* Civic Card */
+.civic-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 22px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 12px;
+}
+
+.section-kicker {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--blue-primary) !important;
+  text-transform: uppercase;
+}
+
+/* Status Badges */
+.badge-pending { background: #fee2e2; color: #b91c1c !important; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; border: 1px solid #fca5a5; }
+.badge-progress { background: #fef3c7; color: #92400e !important; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; border: 1px solid #fde68a; }
+.badge-waiting { background: #fffbeb; color: #b45309 !important; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; border: 1px solid #fcd34d; }
+.badge-reopened { background: #ffedd5; color: #c2410c !important; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; border: 1px solid #fed7aa; }
+.badge-resolved { background: #ecfdf5; color: #059669 !important; padding: 3px 10px; border-radius: 9999px; font-weight: 800; font-size: 11px; border: 1px solid #a7f3d0; }
+
+/* Metrics */
+[data-testid="stMetricValue"] { color: var(--ink-primary) !important; font-weight: 800 !important; }
+[data-testid="stMetricLabel"] { color: var(--ink-muted) !important; font-weight: 700 !important; font-size: 0.8rem !important; }
+
+.auth-note {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: var(--ink-secondary) !important;
+  font-size: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+.auth-note * { color: var(--ink-secondary) !important; }
 </style>
 """, unsafe_allow_html=True)
 
 
 # =============================================================================
-# SHARED HEADER (Identity bar + Tricolor rule + Language switch)
+# SHARED MODERN HEADER
 # =============================================================================
 def render_header():
-    # Top Utility Bar
-    u1, u2 = st.columns([3.2, 1.8])
-    with u1:
-        st.markdown(
-            "<div class='utility-bar'><span>AwazSetu — Accessible Public Grievance &amp; Redressal Service</span>"
-            "<span style='font-size:10.5px;'>Helpline: 1916 | Emergency: 112</span></div>",
-            unsafe_allow_html=True,
-        )
-    with u2:
-        l1, l2, l3 = st.columns(3)
-        with l1:
-            if st.button("English", key="btn_lang_en", use_container_width=True):
-                st.session_state["ui_lang"] = "en"; st.rerun()
-        with l2:
-            if st.button("हिंदी", key="btn_lang_hi", use_container_width=True):
-                st.session_state["ui_lang"] = "hi"; st.rerun()
-        with l3:
-            if st.button("मराठी", key="btn_lang_mr", use_container_width=True):
-                st.session_state["ui_lang"] = "mr"; st.rerun()
-
-    # Identity Bar
     user = st.session_state.get("auth_user")
     if user:
         if st.session_state.get("auth_role") == "admin":
-            role_class = "admin"
             admin_d = st.session_state.get("auth_dept")
             if admin_d and admin_d != "All Departments (Central City Oversight)":
-                role_label = f"🏛️ {admin_d} Officer"
+                role_label = f"🏢 {admin_d} Officer"
             else:
                 role_label = "🏛️ Central Operations Admin"
+            role_badge = f'<span class="badge-role-admin">{role_label}</span>'
         else:
-            role_class = ""
-            role_label = t("role_citizen_tag")
+            role_badge = f'<span class="badge-role-citizen">{t("role_citizen_tag")}</span>'
         initial = (user.get("full_name") or user.get("username") or "?")[:1].upper()
         name_display = user.get("full_name") or user.get("username")
-        right_html = f'<div class="user-chip"><div class="avatar">{initial}</div><div><strong style="font-size:12px; color:var(--navy); display:block;">{name_display}</strong><span class="role-pill {role_class}">{role_label}</span></div></div>'
+        user_chip_html = f'''
+        <div class="user-chip">
+          <div class="user-avatar">{initial}</div>
+          <div>
+            <strong style="font-size:12.5px; color:var(--ink-primary); display:block; line-height:1.2;">{name_display}</strong>
+            {role_badge}
+          </div>
+        </div>
+        '''
     else:
-        right_html = f'<div style="display:flex; align-items:center; gap:8px; background:#fafcfd; border:1px solid var(--border); padding:8px 14px; border-radius:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--green);"></div><div><strong style="font-size:11px; color:var(--navy); display:block;">{t("portal_status")}</strong><small style="font-size:10px; color:var(--text-muted); display:block;">{t("status_operational")}</small></div></div>'
+        user_chip_html = ''
 
-    st.markdown(
-        f'<div class="identity-box"><div style="display:flex; align-items:center;"><div class="emblem-icon">AS</div><div><div class="section-kicker">{t("portal_eyebrow")}</div><h2 style="margin:2px 0 0 0; color:var(--navy); font-size:22px; font-weight:800;">{t("portal_title")}</h2><p style="margin:2px 0 0 0; color:var(--text-muted); font-size:12px;">{t("portal_subtitle")}</p></div></div>{right_html}</div><div class="tricolor-rule"><span></span><span></span><span></span></div>',
-        unsafe_allow_html=True,
-    )
+    # Clean Modern Brand Header with SVG Shield Crest & Status Pill
+    st.markdown(f'''
+    <div class="modern-header">
+      <div class="brand-wrapper">
+        <div class="emblem-crest">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+            <path d="M12 8v8"/><path d="M8 12h8"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">{t("portal_title")}</div>
+          <div class="brand-subtitle">{t("portal_subtitle")}</div>
+        </div>
+      </div>
+      <div class="header-right-strip">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span>{t("status_operational")}</span>
+        </div>
+        <div class="emergency-pill">
+          <span class="pulse-red"></span>
+          <span>Emergency: 112 | 1916</span>
+        </div>
+        {user_chip_html}
+      </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    # Clean Language Pill Bar
+    _, l_col, _ = st.columns([1, 1.4, 1])
+    with l_col:
+        lang_c1, lang_c2, lang_c3 = st.columns(3)
+        curr_lang = st.session_state.get("ui_lang", "en")
+        with lang_c1:
+            if st.button("🌐 English", key="btn_lang_en", use_container_width=True, type="primary" if curr_lang=="en" else "secondary"):
+                st.session_state["ui_lang"] = "en"; st.rerun()
+        with lang_c2:
+            if st.button("🌐 हिंदी", key="btn_lang_hi", use_container_width=True, type="primary" if curr_lang=="hi" else "secondary"):
+                st.session_state["ui_lang"] = "hi"; st.rerun()
+        with lang_c3:
+            if st.button("🌐 मराठी", key="btn_lang_mr", use_container_width=True, type="primary" if curr_lang=="mr" else "secondary"):
+                st.session_state["ui_lang"] = "mr"; st.rerun()
 
     if user:
         _, logout_col = st.columns([5, 1])
         with logout_col:
-            if st.button(t("logout_btn"), key="logout_btn", use_container_width=True):
+            if st.button(f"🚪 {t('logout_btn')}", key="logout_btn", use_container_width=True):
                 st.session_state["auth_user"] = None
                 st.session_state["auth_role"] = None
                 st.session_state["active_tab"] = None
@@ -928,20 +1049,25 @@ def render_header():
 
 
 # =============================================================================
-# AUTH / LOGIN PAGE (Zero Extra Vertical Scroll)
+# AUTH / LOGIN PAGE (Modern Stitch AI Design)
 # =============================================================================
 def render_auth_page():
     render_header()
 
-    _, mid, _ = st.columns([1, 1.4, 1])
+    _, mid, _ = st.columns([1, 1.5, 1])
     with mid:
         st.markdown(f"""
-        <div class="auth-box">
-          <div class="auth-header">
-            <div class="auth-emblem">AS</div>
-            <div class="section-kicker">{t("auth_eyebrow")}</div>
-            <h3 style="margin:4px 0 2px 0; color:var(--navy);">{t("auth_title")}</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin:0;">{t("auth_subtitle")}</p>
+        <div class="auth-card">
+          <div class="auth-brand-section">
+            <div class="auth-emblem">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2">
+                <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+                <path d="M12 8v8"/><path d="M8 12h8"/>
+              </svg>
+            </div>
+            <span class="auth-kicker">{t("auth_eyebrow")}</span>
+            <h2 class="auth-title">{t("auth_title")}</h2>
+            <p class="auth-subtitle">{t("auth_subtitle")}</p>
           </div>
         </div>
         """, unsafe_allow_html=True)
