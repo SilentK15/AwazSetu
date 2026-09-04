@@ -20,7 +20,7 @@ import hashlib
 import secrets
 import base64
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -75,24 +75,47 @@ def init_users_db():
             password_hash TEXT NOT NULL,
             salt TEXT NOT NULL,
             full_name TEXT,
+            department TEXT,
+            employee_id TEXT,
             created_at TEXT,
             UNIQUE(role, username)
         )
     """)
     conn.commit()
-    # Seed a default authority account for demo/evaluation access
-    existing = conn.execute(
-        "SELECT id FROM users WHERE role = ? AND username = ?", ("admin", "admin")
-    ).fetchone()
-    if not existing:
-        salt = secrets.token_hex(8)
-        pw_hash = _hash_password("admin123", salt)
-        conn.execute(
-            "INSERT INTO users (id, role, username, password_hash, salt, full_name, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("USR-ADM-001", "admin", "admin", pw_hash, salt, "Authority Administrator", datetime.now().isoformat()),
-        )
-        conn.commit()
+
+    # Ensure department and employee_id columns exist in existing databases
+    cols = [c[1] for c in conn.execute("PRAGMA table_info(users)").fetchall()]
+    if "department" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN department TEXT")
+    if "employee_id" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN employee_id TEXT")
+    conn.commit()
+
+    # Pre-seed dedicated accounts for every department
+    officers = [
+        ("USR-ADM-001", "admin", "admin", "Central Municipal Commissioner", "All", "MC-HQ-1001"),
+        ("USR-ROADS-01", "admin", "roads_admin", "Roads & Highways Department Officer", "Roads & Infrastructure", "MC-RD-4081"),
+        ("USR-WATER-01", "admin", "water_admin", "Water Supply & Sewerage Officer", "Water Supply", "MC-WS-5190"),
+        ("USR-POWER-01", "admin", "power_admin", "Electrical Engineering Officer", "Electricity/Power", "MC-EE-7230"),
+        ("USR-WASTE-01", "admin", "waste_admin", "Solid Waste Management Officer", "Waste Management", "MC-WM-3124"),
+        ("USR-HEALTH-01", "admin", "health_admin", "Chief Public Health Officer", "Public Health", "MC-PH-8802"),
+    ]
+    for uid, role, uname, fname, dept, emp_id in officers:
+        existing = conn.execute("SELECT id FROM users WHERE role = ? AND username = ?", (role, uname)).fetchone()
+        if not existing:
+            salt = secrets.token_hex(8)
+            pw_hash = _hash_password("admin123", salt)
+            conn.execute(
+                "INSERT INTO users (id, role, username, password_hash, salt, full_name, department, employee_id, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (uid, role, uname, pw_hash, salt, fname, dept, emp_id, datetime.now().isoformat()),
+            )
+        else:
+            conn.execute(
+                "UPDATE users SET department = ?, full_name = ?, employee_id = ? WHERE role = ? AND username = ?",
+                (dept, fname, emp_id, role, uname),
+            )
+    conn.commit()
     conn.close()
 
 
@@ -258,6 +281,21 @@ TRANSLATIONS = {
         "my_kpi_total": "Filed by me",
         "my_kpi_open": "Awaiting resolution",
         "my_kpi_resolved": "Resolved",
+        "status_waiting": "Waiting for Citizen Confirmation",
+        "status_reopened": "Reopened",
+        "res_proof_title": "Resolution Proof & Verification",
+        "btn_confirm_res": "✓ Confirm Resolved (Close & Remove Ticket)",
+        "btn_reopen": "↺ Issue Not Fixed (Reopen Ticket)",
+        "affects_me_too": "👍 Affects Me Too (+1)",
+        "already_upvoted": "✓ Confirmed by You (+1)",
+        "admin_no_upvote": "Authority accounts cannot upvote grievances",
+        "did_it_resolve": "Did the municipal authority successfully resolve this issue?",
+        "reopen_reason_placeholder": "Please explain what remains incomplete or unfixed...",
+        "upload_proof_label": "Upload Resolution Proof Photo (Mandatory)",
+        "res_note_label": "Resolution Completion Note / Remarks",
+        "btn_send_citizen_confirm": "Submit Resolution for Citizen Verification",
+        "sla_breached": "SLA Breached",
+        "sla_remaining": "SLA Remaining",
     },
     "hi": {
         "portal_title": "आवाज़सेतु (AwazSetu)",
@@ -357,6 +395,21 @@ TRANSLATIONS = {
         "my_kpi_total": "मेरे द्वारा दर्ज",
         "my_kpi_open": "समाधान लंबित",
         "my_kpi_resolved": "समाधानित",
+        "status_waiting": "नागरिक पुष्टि की प्रतीक्षा",
+        "status_reopened": "पुनः खोला गया",
+        "res_proof_title": "समाधान प्रमाण और सत्यापन",
+        "btn_confirm_res": "✓ समाधान की पुष्टि करें (टिकट हटाएं)",
+        "btn_reopen": "↺ समस्या हल नहीं हुई (पुनः खोलें)",
+        "affects_me_too": "👍 मुझे भी यह समस्या है (+1)",
+        "already_upvoted": "✓ आपकी पुष्टि दर्ज (+1)",
+        "admin_no_upvote": "अधिकारी खाते शिकायतों पर वोट नहीं कर सकते",
+        "did_it_resolve": "क्या नगर निगम ने इस समस्या का समाधान संतोषजनक रूप से कर दिया है?",
+        "reopen_reason_placeholder": "कृपया बताएं कि क्या काम अधूरा या असंतोषजनक रह गया...",
+        "upload_proof_label": "समाधान प्रमाण फोटो अपलोड करें (अनिवार्य)",
+        "res_note_label": "समाधान विवरण / कार्य नोट",
+        "btn_send_citizen_confirm": "नागरिक सत्यापन के लिए समाधान भेजें",
+        "sla_breached": "SLA सीमा समाप्त",
+        "sla_remaining": "SLA शेष",
     },
     "mr": {
         "portal_title": "आवाज़सेतु (AwazSetu)",
@@ -456,6 +509,21 @@ TRANSLATIONS = {
         "my_kpi_total": "मी नोंदवलेल्या",
         "my_kpi_open": "निवारण प्रलंबित",
         "my_kpi_resolved": "निवारण झाले",
+        "status_waiting": "नागरिक पुष्टीकरणाची प्रतीक्षा",
+        "status_reopened": "पुन्हा उघडले",
+        "res_proof_title": "निवारण पुरावा आणि पडताळणी",
+        "btn_confirm_res": "✓ निवारण पुष्टी करा (तिकीट बंद आणि नष्ट करा)",
+        "btn_reopen": "↺ समस्या सुटलेली नाही (पुन्हा उघडा)",
+        "affects_me_too": "👍 मलाही हीच समस्या भेडसावत आहे (+1)",
+        "already_upvoted": "✓ तुमची पुष्टी नोंदवली (+1)",
+        "admin_no_upvote": "अधिकारी खाती तक्रारींवर मत देऊ शकत नाहीत",
+        "did_it_resolve": "महानगरपालिकेने या समस्येचे निवारण समाधानकारक केले आहे का?",
+        "reopen_reason_placeholder": "कृपया काय काम अपूर्ण किंवा अयोग्य राहिले ते स्पष्ट करा...",
+        "upload_proof_label": "निवारण पुरावा फोटो अपलोड करा (अनिवार्य)",
+        "res_note_label": "निवारण तपशील / काम पूर्ण नोंद",
+        "btn_send_citizen_confirm": "नागरिक पडताळणीसाठी निवारण सादर करा",
+        "sla_breached": "SLA मर्यादा संपली",
+        "sla_remaining": "SLA शिल्लक",
     },
 }
 
@@ -463,6 +531,21 @@ TRANSLATIONS = {
 def t(key: str) -> str:
     lang = st.session_state.get("ui_lang", "en")
     return TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, TRANSLATIONS["en"].get(key, key))
+
+
+def compute_sla_badge(created_at_str: str, priority: str) -> str:
+    try:
+        dt = datetime.fromisoformat(created_at_str)
+        limit_hrs = {"Critical": 12, "High": 24, "Medium": 48, "Low": 72}.get(priority, 48)
+        deadline = dt + timedelta(hours=limit_hrs)
+        now = datetime.now()
+        rem_hrs = (deadline - now).total_seconds() / 3600.0
+        if rem_hrs <= 0:
+            return f'<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; border:1px solid #fca5a5;">⚠️ {t("sla_breached")} ({abs(rem_hrs):.1f}h)</span>'
+        else:
+            return f'<span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; border:1px solid #fde68a;">⏱️ {t("sla_remaining")}: {rem_hrs:.1f}h</span>'
+    except Exception:
+        return ""
 
 
 # =============================================================================
@@ -644,6 +727,8 @@ div[data-baseweb="select"] > div {
 /* Badges */
 .badge-pending { background: #fee2e2; color: #991b1b !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fecaca; }
 .badge-progress { background: #fef3c7; color: #92400e !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fde68a; }
+.badge-waiting { background: #fef3c7; color: #b45309 !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fcd34d; }
+.badge-reopened { background: #ffedd5; color: #c2410c !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #fed7aa; }
 .badge-resolved { background: #dcfce7; color: #166534 !important; padding: 3px 10px; border-radius: 12px; font-weight: 800; font-size: 10.5px; border: 1px solid #bbf7d0; }
 
 /* Stepper */
@@ -917,14 +1002,63 @@ def render_auth_page():
         # ---------------- ADMIN AUTH ----------------
         with role_tab_admin:
             st.caption(t("admin_login_desc"))
+
+            st.markdown(
+                '<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:10px 12px; margin-bottom:12px; font-size:12px; color:#1e40af;">'
+                '🔒 <b>Department Officer Portal:</b> Officer accounts are provisioned directly by Municipal Administration. Public officer registration is disabled for safety.'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+
+            st.markdown("<p style='font-size:12px; font-weight:700; margin-bottom:4px;'>⚡ Quick Access Department Roles:</p>", unsafe_allow_html=True)
+            qc1, qc2, qc3 = st.columns(3)
+            with qc1:
+                if st.button("🚧 Roads", key="qk_roads", use_container_width=True):
+                    st.session_state["adm_uname_prefill"] = "roads_admin"
+                    st.session_state["adm_dept_prefill"] = "Roads & Infrastructure"
+                    st.rerun()
+            with qc2:
+                if st.button("💧 Water", key="qk_water", use_container_width=True):
+                    st.session_state["adm_uname_prefill"] = "water_admin"
+                    st.session_state["adm_dept_prefill"] = "Water Supply"
+                    st.rerun()
+            with qc3:
+                if st.button("⚡ Power", key="qk_power", use_container_width=True):
+                    st.session_state["adm_uname_prefill"] = "power_admin"
+                    st.session_state["adm_dept_prefill"] = "Electricity/Power"
+                    st.rerun()
+
+            qc4, qc5, qc6 = st.columns(3)
+            with qc4:
+                if st.button("🗑️ Waste", key="qk_waste", use_container_width=True):
+                    st.session_state["adm_uname_prefill"] = "waste_admin"
+                    st.session_state["adm_dept_prefill"] = "Waste Management"
+                    st.rerun()
+            with qc5:
+                if st.button("🏥 Health", key="qk_health", use_container_width=True):
+                    st.session_state["adm_uname_prefill"] = "health_admin"
+                    st.session_state["adm_dept_prefill"] = "Public Health"
+                    st.rerun()
+            with qc6:
+                if st.button("🏛️ Central", key="qk_central", use_container_width=True):
+                    st.session_state["adm_uname_prefill"] = "admin"
+                    st.session_state["adm_dept_prefill"] = "All Departments (Central City Oversight)"
+                    st.rerun()
+
+            dept_options = ["All Departments (Central City Oversight)"] + list(backend.DEPARTMENTS.keys())
+            pre_dept = st.session_state.get("adm_dept_prefill", "All Departments (Central City Oversight)")
+            dept_idx = dept_options.index(pre_dept) if pre_dept in dept_options else 0
+            pre_uname = st.session_state.get("adm_uname_prefill", "admin")
+
             with st.form("admin_login_form"):
                 dept_in = st.selectbox(
-                    "🏛️ Select Department Authority",
-                    ["All Departments (Central City Oversight)"] + list(backend.DEPARTMENTS.keys()),
+                    "🏛️ Designated Department Authority",
+                    dept_options,
+                    index=dept_idx,
                     help="Select your designated municipal department to manage grievances specifically assigned to your domain."
                 )
-                uname_in = st.text_input(t("lbl_username"), placeholder="admin")
-                apw_in = st.text_input(t("lbl_password"), type="password")
+                uname_in = st.text_input(t("lbl_username"), value=pre_uname, placeholder="e.g. roads_admin, water_admin, admin")
+                apw_in = st.text_input(t("lbl_password"), value="admin123", type="password")
                 ago = st.form_submit_button(t("btn_login"), use_container_width=True)
             if ago:
                 if not uname_in or not apw_in:
@@ -934,12 +1068,22 @@ def render_auth_page():
                     if user:
                         st.session_state["auth_user"] = user
                         st.session_state["auth_role"] = "admin"
-                        st.session_state["auth_dept"] = dept_in
+                        # Set department scope
+                        u_dept = user.get("department")
+                        if u_dept and u_dept != "All":
+                            st.session_state["auth_dept"] = u_dept
+                        else:
+                            st.session_state["auth_dept"] = dept_in
                         st.session_state["active_tab"] = "dashboard"
                         st.rerun()
                     else:
                         st.error(t("err_invalid"))
-            st.markdown(f'<div class="auth-note">{t("demo_admin_hint")}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="auth-note">💡 <b>Pre-configured Officer Accounts (Password: <code>admin123</code>):</b><br>'
+                f'• Roads: <code>roads_admin</code> · Water: <code>water_admin</code> · Power: <code>power_admin</code><br>'
+                f'• Waste: <code>waste_admin</code> · Health: <code>health_admin</code> · Central: <code>admin</code></div>',
+                unsafe_allow_html=True
+            )
 
 
 # =============================================================================
@@ -1141,6 +1285,11 @@ if selected_tab == "citizen":
                 sentiment = sia.polarity_scores(text_en)["compound"]
 
                 photo_bytes = photo.getvalue() if photo is not None else None
+                image_b64 = None
+                if photo_bytes is not None:
+                    mime = "image/png" if (photo.name or "").lower().endswith(".png") else "image/jpeg"
+                    image_b64 = f"data:{mime};base64," + base64.b64encode(photo_bytes).decode("utf-8")
+
                 department, xai_dept, _ = backend.classify_department(text_en, category_hint=category_hint, photo_bytes=photo_bytes)
                 if category_hint != t("cat_placeholder") and category_hint != department:
                     xai_dept += f"\n- User selected hint '{category_hint}', but AI classified as '{department}' from semantic keywords."
@@ -1175,6 +1324,7 @@ if selected_tab == "citizen":
                     "xai_department": xai_dept,
                     "xai_priority": xai_priority,
                     "image_flag": 1 if photo is not None else 0,
+                    "image_data": image_b64,
                     "citizen_name": current_user.get("full_name") or "Citizen",
                     "citizen_phone": current_user.get("username") or "",
                     "created_at": datetime.now().isoformat(),
@@ -1254,28 +1404,116 @@ elif selected_tab == "track":
             ]
 
         for r in records:
+            tid = r["id"]
             p_color = backend.PRIORITY_COLORS.get(r['priority'], '#64748b')
-            status_badge = (
-                f'<span class="badge-pending">{t("status_pending")}</span>' if r['status'] == 'Pending'
-                else f'<span class="badge-progress">{t("status_progress")}</span>' if r['status'] == 'In Progress'
-                else f'<span class="badge-resolved">{t("status_resolved")}</span>'
-            )
-            dup_tag = f"<span style='color:#a15c00; font-size:11px;'>[Merged into #{r['parent_id']}]</span>" if r['is_duplicate'] else ""
+
+            st_val = r.get("status", "Pending")
+            if st_val == "Pending":
+                status_badge = f'<span class="badge-pending">{t("status_pending")}</span>'
+            elif st_val == "In Progress":
+                status_badge = f'<span class="badge-progress">{t("status_progress")}</span>'
+            elif st_val in ("Waiting for Citizen Confirmation", "Awaiting Citizen Confirmation"):
+                status_badge = f'<span class="badge-waiting">⏳ {t("status_waiting")}</span>'
+            elif st_val == "Reopened":
+                status_badge = f'<span class="badge-reopened">↺ {t("status_reopened")}</span>'
+            else:
+                status_badge = f'<span class="badge-resolved">✓ {t("status_resolved")}</span>'
+
+            dup_tag = f"<span style='color:#a15c00; font-size:11px; font-weight:700;'>[Merged ➔ #{r['parent_id']}]</span>" if r.get('is_duplicate') else ""
+            sla_html = compute_sla_badge(r.get("created_at", ""), r.get("priority", "Medium"))
+            lat, lon = r.get("lat"), r.get("lon")
+            map_link = f'<a href="https://www.google.com/maps?q={lat},{lon}" target="_blank" style="font-size:11px; text-decoration:none; color:var(--navy); font-weight:700;">🗺️ Maps ↗</a>' if (lat and lon) else ""
 
             st.markdown(
-                f'<div class="civic-card">'
-                f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">'
-                f'<div><span style="font-weight:800; color:var(--navy); font-size:1.05rem;">#{r["id"]}</span> &nbsp;·&nbsp; <b>{r["department"]}</b> {dup_tag} &nbsp;·&nbsp; <span style="font-size:0.8rem; color:var(--muted);">Area: {r["ward"]}</span></div>'
-                f'<div>{status_badge} &nbsp;<span style="color:{p_color}; font-weight:700; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px;">{r["priority"]} ({r["severity_score"]}/100)</span></div>'
+                f'<div class="civic-card" style="border-left: 4px solid {p_color};">'
+                f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">'
+                f'<div><span style="font-weight:800; color:var(--navy); font-size:1.05rem;">#{tid}</span> &nbsp;·&nbsp; <b>{r["department"]}</b> {dup_tag} &nbsp;·&nbsp; <span style="font-size:0.82rem; color:var(--text-muted);">Area: {r["ward"]}</span> &nbsp; {map_link}</div>'
+                f'<div style="display:flex; align-items:center; gap:6px;">{sla_html} {status_badge} &nbsp;<span style="color:{p_color}; font-weight:800; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px; background:#ffffff;">{r["priority"]} ({r["severity_score"]}/100)</span></div>'
                 f'</div>'
-                f'<div style="color:var(--ink); font-size:0.9rem; margin-bottom:8px;">"{r["original_text"]}"</div>'
-                f'<div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted);">'
-                f'<span>Reported: {r["created_at"][:16].replace("T", " ")}</span>'
-                f'<span>Community Confirmations: <b>{r["upvotes"]}</b></span>'
+                f'<div style="color:var(--ink); font-size:0.92rem; margin-bottom:8px;">"{r["original_text"]}"</div>'
+                f'<div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">'
+                f'<span>Reported: {r["created_at"][:16].replace("T", " ")} · Reporter: <b>{r.get("citizen_name", "Citizen")}</b></span>'
+                f'<span>Community Confirmations: <b>{r.get("upvotes", 0)}</b></span>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
+
+            # Display Before and Resolution Proof Photos if available
+            has_orig = bool(r.get("image_data"))
+            has_proof = bool(r.get("resolution_photo"))
+            if has_orig or has_proof:
+                img_c1, img_c2 = st.columns(2)
+                with img_c1:
+                    if has_orig:
+                        st.markdown("<span style='font-size:11.5px; font-weight:700; color:var(--navy);'>📸 Original Reported Photo</span>", unsafe_allow_html=True)
+                        st.image(r["image_data"], use_container_width=True)
+                with img_c2:
+                    if has_proof:
+                        st.markdown("<span style='font-size:11.5px; font-weight:700; color:#166534;'>✅ Municipal Resolution Proof Photo</span>", unsafe_allow_html=True)
+                        st.image(r["resolution_photo"], use_container_width=True)
+
+            if r.get("resolution_note"):
+                st.markdown(
+                    f'<div style="background:#f8fafc; border-left:3px solid #0b3c5d; padding:8px 12px; border-radius:4px; font-size:12px; margin:4px 0 8px 0;">'
+                    f'<strong>🏛️ Municipal Resolution Note:</strong> {r["resolution_note"]}'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+            if r.get("citizen_remarks"):
+                st.markdown(
+                    f'<div style="background:#fff7ed; border-left:3px solid #ea580c; padding:8px 12px; border-radius:4px; font-size:12px; margin:4px 0 8px 0;">'
+                    f'<strong>↺ Citizen Reopen Remarks:</strong> {r["citizen_remarks"]}'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+            # Citizen Verification Box when Waiting for Citizen Confirmation
+            if r.get("status") in ("Waiting for Citizen Confirmation", "Awaiting Citizen Confirmation"):
+                st.markdown(f"""
+                <div style="background:#fffbeb; border:1.5px solid #f59e0b; border-left:5px solid #d97706; padding:12px 16px; border-radius:8px; margin:8px 0 10px 0;">
+                  <strong style="color:#92400e; font-size:13.5px; display:block;">⚠️ {t("did_it_resolve")}</strong>
+                  <p style="margin:4px 0 0 0; font-size:12px; color:#78350f;">The assigned municipal department has completed work and submitted photographic evidence above. Please verify whether the issue is resolved.</p>
+                </div>
+                """, unsafe_allow_html=True)
+                vcol1, vcol2 = st.columns(2)
+                with vcol1:
+                    if st.button(t("btn_confirm_res"), key=f"conf_{tid}", use_container_width=True):
+                        backend.record_citizen_feedback_in_db(tid, "Confirmed", "Citizen confirmed resolution")
+                        st.success(f"✓ Resolution confirmed! Ticket #{tid} has been permanently closed and removed from active municipal records.")
+                        st.rerun()
+                with vcol2:
+                    with st.expander(t("btn_reopen")):
+                        rem_in = st.text_input(t("reopen_reason_placeholder"), key=f"rem_{tid}")
+                        if st.button("Submit Reopen Request", key=f"sub_reopen_{tid}", use_container_width=True):
+                            if not rem_in.strip():
+                                st.error("Please explain why the issue is not resolved.")
+                            else:
+                                backend.record_citizen_feedback_in_db(tid, "Reopened", rem_in.strip())
+                                st.warning(f"Ticket #{tid} has been reopened with escalated urgency (+15 points) and assigned back to the department.")
+                                st.rerun()
+
+            # Community Upvoting with Duplicate Vote Prevention
+            if r.get("status") != "Resolved":
+                u_col1, u_col2 = st.columns([2.5, 1.5])
+                with u_col2:
+                    if role == "admin":
+                        st.caption(f"👥 {r.get('upvotes', 0)} Community Confirmations ({t('admin_no_upvote')})")
+                    else:
+                        uid = current_user.get("username") or "citizen"
+                        upvoted_tickets = backend.fetch_user_upvoted_tickets(uid)
+                        if tid in upvoted_tickets:
+                            st.button(f"{t('already_upvoted')} ({r.get('upvotes', 0)})", key=f"voted_{tid}", disabled=True, use_container_width=True)
+                        else:
+                            if st.button(f"{t('affects_me_too')} ({r.get('upvotes', 0)})", key=f"vote_{tid}", use_container_width=True):
+                                ok, msg = backend.record_citizen_upvote_in_db(tid, uid, boost_points=5)
+                                if ok:
+                                    st.success("Your confirmation has been recorded (+5 urgency points added)!")
+                                    st.rerun()
+                                else:
+                                    st.warning(msg)
+
+            st.markdown("<hr style='margin:12px 0 16px 0; border-color:#e2e8f0;'>", unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -1447,11 +1685,18 @@ elif selected_tab == "dashboard":
             for r in filtered_records:
                 tid = r["id"]
                 p_color = backend.PRIORITY_COLORS.get(r['priority'], '#64748b')
-                st_badge = (
-                    f'<span class="badge-pending">Pending</span>' if r['status'] == 'Pending'
-                    else f'<span class="badge-progress">In Progress</span>' if r['status'] == 'In Progress'
-                    else f'<span class="badge-resolved">Resolved</span>'
-                )
+
+                st_val = r.get("status", "Pending")
+                if st_val == "Pending":
+                    st_badge = '<span class="badge-pending">Pending</span>'
+                elif st_val == "In Progress":
+                    st_badge = '<span class="badge-progress">In Progress</span>'
+                elif st_val in ("Waiting for Citizen Confirmation", "Awaiting Citizen Confirmation"):
+                    st_badge = '<span class="badge-waiting">⏳ Waiting for Citizen Confirmation</span>'
+                elif st_val == "Reopened":
+                    st_badge = '<span class="badge-reopened">↺ Reopened by Citizen</span>'
+                else:
+                    st_badge = '<span class="badge-resolved">✓ Resolved</span>'
 
                 dup_tag = ""
                 if r.get("is_duplicate") == 1:
@@ -1459,11 +1704,15 @@ elif selected_tab == "dashboard":
                 elif r.get("upvotes", 0) > 0:
                     dup_tag = f'<span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:4px; font-weight:800; font-size:10.5px; border:1px solid #bfdbfe; margin-left:6px;">👥 Master Ticket ({r.get("upvotes")} Merged Reports)</span>'
 
+                sla_html = compute_sla_badge(r.get("created_at", ""), r.get("priority", "Medium"))
+                lat, lon = r.get("lat"), r.get("lon")
+                map_link = f'<a href="https://www.google.com/maps?q={lat},{lon}" target="_blank" style="font-size:11px; text-decoration:none; color:var(--navy); font-weight:700;">🗺️ Maps ↗</a>' if (lat and lon) else ""
+
                 st.markdown(
                     f'<div class="civic-card" style="border-left: 4px solid {p_color}; margin-bottom: 12px;">'
-                    f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">'
-                    f'<div><strong style="font-size:1.05rem; color:var(--navy);">#{tid}</strong> &nbsp;·&nbsp; <b>{r["department"]}</b> &nbsp;·&nbsp; <span style="font-size:11.5px; color:var(--text-muted);">Area: {r["ward"]}</span>{dup_tag}</div>'
-                    f'<div>{st_badge} &nbsp;<span style="color:{p_color}; font-weight:800; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px; background:#ffffff;">{r["priority"]} ({r["severity_score"]}/100)</span></div>'
+                    f'<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">'
+                    f'<div><strong style="font-size:1.05rem; color:var(--navy);">#{tid}</strong> &nbsp;·&nbsp; <b>{r["department"]}</b> &nbsp;·&nbsp; <span style="font-size:11.5px; color:var(--text-muted);">Area: {r["ward"]}</span>{dup_tag} &nbsp; {map_link}</div>'
+                    f'<div style="display:flex; align-items:center; gap:6px;">{sla_html} {st_badge} &nbsp;<span style="color:{p_color}; font-weight:800; font-size:11px; border:1px solid {p_color}; padding:2px 8px; border-radius:4px; background:#ffffff;">{r["priority"]} ({r["severity_score"]}/100)</span></div>'
                     f'</div>'
                     f'<p style="margin:8px 0; font-size:0.92rem; color:#1e293b;">"{r["original_text"]}"</p>'
                     f'<div style="font-size:11px; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:4px;">'
@@ -1474,6 +1723,35 @@ elif selected_tab == "dashboard":
                     unsafe_allow_html=True,
                 )
 
+                # Show Before & After photos if available
+                has_orig = bool(r.get("image_data"))
+                has_proof = bool(r.get("resolution_photo"))
+                if has_orig or has_proof:
+                    img_c1, img_c2 = st.columns(2)
+                    with img_c1:
+                        if has_orig:
+                            st.markdown("<span style='font-size:11px; font-weight:700; color:var(--navy);'>📸 Citizen Reported Photo</span>", unsafe_allow_html=True)
+                            st.image(r["image_data"], use_container_width=True)
+                    with img_c2:
+                        if has_proof:
+                            st.markdown("<span style='font-size:11px; font-weight:700; color:#166534;'>✅ Submitted Resolution Proof</span>", unsafe_allow_html=True)
+                            st.image(r["resolution_photo"], use_container_width=True)
+
+                if r.get("resolution_note"):
+                    st.markdown(
+                        f'<div style="background:#f8fafc; border-left:3px solid #0b3c5d; padding:8px 12px; border-radius:4px; font-size:12px; margin:4px 0 8px 0;">'
+                        f'<strong>🏛️ Officer Resolution Note:</strong> {r["resolution_note"]}'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                if r.get("citizen_remarks"):
+                    st.markdown(
+                        f'<div style="background:#fff7ed; border-left:3px solid #ea580c; padding:8px 12px; border-radius:4px; font-size:12px; margin:4px 0 8px 0;">'
+                        f'<strong>↺ Citizen Reopen Remarks:</strong> {r["citizen_remarks"]}'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
                 # Check if this master ticket has linked child duplicates
                 if r.get("is_duplicate") == 0 and r.get("upvotes", 0) > 0:
                     child_reports = [c for c in records if c.get("parent_id") == tid]
@@ -1482,42 +1760,57 @@ elif selected_tab == "dashboard":
                             for cr in child_reports:
                                 st.markdown(f"- **#{cr['id']}**: *\"{cr['original_text']}\"* (Reporter: {cr.get('citizen_name', 'Citizen')} - `{cr.get('citizen_phone')}`, {cr['created_at'][:16].replace('T', ' ')})")
 
-                # Mandatory Resolution Proof Upload
-                res_photo = st.file_uploader(
-                    f"📸 Upload Resolution Proof Photo (Mandatory to Resolve #{tid})",
-                    type=["png", "jpg", "jpeg"],
-                    key=f"proof_photo_{tid}",
-                    help="Physical evidence of work completion is strictly required by municipal audit protocol to close this ticket."
-                )
-
-                # Action bar per ticket
-                act1, act2, act3 = st.columns([1.5, 1, 1])
-                with act1:
-                    new_status = st.selectbox(
-                        "Change Status",
-                        backend.STATUS_OPTIONS,
-                        index=backend.STATUS_OPTIONS.index(r["status"]),
-                        key=f"status_select_{tid}",
-                        label_visibility="collapsed"
+                # Action Controls
+                if st_val in ("Waiting for Citizen Confirmation", "Awaiting Citizen Confirmation"):
+                    st.markdown(
+                        f'<div style="background:#fef3c7; border:1px solid #f59e0b; border-radius:6px; padding:10px 14px; font-size:12px; color:#92400e; margin-bottom:8px;">'
+                        f'⏳ <b>Resolution Proof Submitted:</b> Awaiting citizen confirmation. Once confirmed by the citizen, this ticket will automatically be closed and removed.'
+                        f'</div>',
+                        unsafe_allow_html=True,
                     )
-                with act2:
-                    if st.button("Update", key=f"btn_upd_{tid}", use_container_width=True):
-                        if new_status == "Resolved" and res_photo is None:
-                            st.error(f"⚠️ Mandatory Resolution Proof Required: You must attach a photo of the completed work before marking Ticket #{tid} as Resolved!")
-                        else:
-                            backend.update_status_in_db(tid, new_status)
-                            if new_status == "Resolved":
-                                st.success(f"Ticket #{tid} verified with resolution proof and deleted from active queue!")
-                            else:
-                                st.success(f"Ticket #{tid} updated to '{new_status}'!")
+                    if st.button("↩ Revert to 'In Progress'", key=f"revert_{tid}"):
+                        backend.update_status_in_db(tid, "In Progress")
+                        st.success(f"Ticket #{tid} status reverted to 'In Progress'.")
+                        st.rerun()
+                else:
+                    # In-progress / Pending updates
+                    st1, st2 = st.columns([2, 1])
+                    with st1:
+                        prog_status = st.selectbox(
+                            "Status Step",
+                            ["Pending", "In Progress"],
+                            index=0 if st_val == "Pending" else 1,
+                            key=f"status_step_{tid}",
+                            label_visibility="collapsed"
+                        )
+                    with st2:
+                        if st.button("Update Status", key=f"btn_step_{tid}", use_container_width=True):
+                            backend.update_status_in_db(tid, prog_status)
+                            st.success(f"Ticket #{tid} updated to '{prog_status}'!")
                             st.rerun()
-                with act3:
-                    if st.button("Mark Resolved", key=f"btn_res_{tid}", use_container_width=True):
+
+                    # Mandatory Resolution Proof Upload to resolve
+                    res_photo = st.file_uploader(
+                        f"📸 Upload Mandatory Resolution Proof Photo (#{tid})",
+                        type=["png", "jpg", "jpeg"],
+                        key=f"proof_photo_{tid}",
+                        help="Physical evidence of work completion is strictly required by municipal audit protocol to resolve this ticket."
+                    )
+                    res_note = st.text_input(
+                        f"Resolution Completion Remarks (#{tid})",
+                        placeholder="e.g. Cleared 2 metric tons of waste and sanitized container area...",
+                        key=f"res_note_{tid}"
+                    )
+
+                    if st.button(f"🚀 {t('btn_send_citizen_confirm')} (#{tid})", key=f"btn_res_{tid}", use_container_width=True):
                         if res_photo is None:
-                            st.error(f"⚠️ Mandatory Resolution Proof Required: Please upload a photo showing the resolved issue before closing Ticket #{tid}!")
+                            st.error(f"⚠️ Mandatory Resolution Proof Required: You must attach a photo showing the completed work before sending Ticket #{tid} for citizen verification!")
                         else:
-                            backend.update_status_in_db(tid, "Resolved")
-                            st.success(f"Ticket #{tid} verified with resolution photo and closed!")
+                            photo_bytes = res_photo.getvalue()
+                            mime = "image/png" if (res_photo.name or "").lower().endswith(".png") else "image/jpeg"
+                            b64_proof = f"data:{mime};base64," + base64.b64encode(photo_bytes).decode("utf-8")
+                            backend.update_status_in_db(tid, "Waiting for Citizen Confirmation", resolution_photo=b64_proof, resolution_note=res_note.strip())
+                            st.success(f"✓ Resolution proof uploaded for Ticket #{tid}! Sent for citizen verification.")
                             st.rerun()
 
                 with st.expander(f"View AI Diagnostic & Routing Reason (#{tid})"):
