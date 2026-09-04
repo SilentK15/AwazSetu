@@ -1140,7 +1140,8 @@ if selected_tab == "citizen":
                 sia = backend.SentimentIntensityAnalyzer()
                 sentiment = sia.polarity_scores(text_en)["compound"]
 
-                department, xai_dept, _ = backend.classify_department(text_en)
+                photo_bytes = photo.getvalue() if photo is not None else None
+                department, xai_dept, _ = backend.classify_department(text_en, category_hint=category_hint, photo_bytes=photo_bytes)
                 if category_hint != t("cat_placeholder") and category_hint != department:
                     xai_dept += f"\n- User selected hint '{category_hint}', but AI classified as '{department}' from semantic keywords."
 
@@ -1148,7 +1149,6 @@ if selected_tab == "citizen":
                 existing_records = backend.fetch_all_records()
                 parent_id, sim = backend.find_duplicate_match(embedding, lat, lon, existing_records, new_dept=department)
 
-                photo_bytes = photo.getvalue() if photo is not None else None
                 severity_score, priority, xai_priority = backend.score_priority(
                     text_en, sentiment, upvotes=0, has_photo=(photo is not None), photo_bytes=photo_bytes
                 )

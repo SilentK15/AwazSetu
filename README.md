@@ -1,95 +1,128 @@
-# Smart Grievance AI — SIH Hackathon MVP
+# AwazSetu (आवाज़ सेतु) 🏛️
+### Smart Citizen Grievance Redressal & Duplicate Detection System (SIH 2026)
 
-AI-Based Citizen Grievance Classification, Prioritization & Duplicate Detection.
+Hey there! This is **AwazSetu**, a platform we built to fix how municipal complaints are handled. 
 
-A single-file, self-contained Streamlit app. No paid API key is required to run
-it — it works fully offline-tolerant with local fallbacks, and will
-transparently upgrade its translation quality if you add a free/optional
-Gemini API key.
+Most civic complaint portals have two massive issues:
+1. **Wrong Department Routing:** A citizen complains about a crater or accident risk on a broken road, but it ends up in Electricity or Water Supply because of a broken dropdown or generic keywords.
+2. **Duplicate Overload:** When a water main bursts or a massive pothole opens up at a busy junction, dozens of citizens report the exact same thing. Municipal officers get buried under 50 separate tickets for one incident instead of fixing the actual problem.
 
-## What's inside
+AwazSetu solves this by using real-time AI classification, smart geospatial duplicate detection, and dedicated departmental admin portals so officers can get straight to work with exact Google Maps coordinates.
 
-- **Citizen Portal** — multilingual complaint submission (English/Hindi/etc.),
-  preset city locations, manual lat/long, or click-to-pick on a map, plus a
-  mock photo upload.
-- **AI Classification & Priority Engine** — rule-based keyword classification
-  with a semantic (sentence-embedding) fallback for department routing, and an
-  explainable 1–100 severity/priority score built from severity keywords +
-  VADER sentiment + repeat-report frequency. Every decision includes a
-  plain-English XAI rationale.
-- **Semantic Duplicate Detection** — `sentence-transformers` (`all-MiniLM-L6-v2`)
-  embeddings + cosine similarity (>0.80) combined with a 500 m geospatial
-  proximity check. Duplicates are merged into the parent ticket, boost its
-  priority, and the citizen is notified.
-- **Root-Cause Clustering** — a looser similarity/proximity threshold groups
-  related micro-issues (e.g. several nearby potholes) into named clusters.
-- **GIS Hotspot Map** — Folium map with priority-colored markers + a
-  complaint-density heatmap layer, filterable by department/priority.
-- **Admin Dashboard** — analytics cards, filterable/searchable ticket table,
-  status management (Pending/In Progress/Resolved), and a per-ticket inspector
-  showing full XAI rationale and linked duplicate reports.
-- **Pre-seeded mock data** — 11 realistic grievances across Pune wards,
-  including 2 intentional duplicate pairs, so the demo is immediately
-  populated and visually dynamic.
+---
 
-## Installation
+## What the system actually does
 
+### 1. Citizen Portal
+- **Zero Confusion Form:** Citizens can just describe what's wrong in plain English, Hindi, or Marathi. They don't need to guess which government department handles what — our AI auto-routes it.
+- **Smart Location Search:** Type any society, landmark, or street name (e.g., *Lodha Amara*, *Vardhaman Vatika*). It autocompletes using live geocoding and drops an interactive Leaflet pin.
+- **Photo Evidence:** Upload on-site photos. The backend runs computer vision edge/texture analysis to assess structural damage and boost the urgency score.
+- **Strict Privacy & Ticket Tracking:** Citizens log in with their mobile number and only see their own filed complaints and real-time status.
+
+### 2. Department-Specific Admin Dashboards
+- **Department Portals:** Officers don't get distracted by other departments' issues. A Roads engineer only sees Roads & Potholes tickets, Water engineers see pipeline issues, etc. (with a Central Admin view for the Municipal Commissioner).
+- **Exact Google Maps Links:** Every ticket shows the exact GPS coordinates and place name with a 1-click **"Open in Google Maps"** button so field teams can navigate right to the spot.
+- **Live GIS Heatmap:** See priority-coded incident pins across the city.
+- **Status Lifecycle:** Mark complaints as *Pending*, *In Progress*, or *Resolved*.
+
+### 3. AI Redressal Engine (Under the Hood)
+- **Road Safety & Accident Safeguard:** High-risk road hazards and accident risks are guarded against false routing.
+- **Semantic + Lexical Routing:** Combines keyword signals with `all-MiniLM-L6-v2` sentence embeddings when complaints are short or ambiguous.
+- **Multi-Tiered Duplicate Clustering:**
+  - If a complaint is filed within **400m** of an active issue in the same department with matching semantics, it merges automatically.
+  - Adaptive thresholds check up to **1.5 km** for broader locality clustering.
+  - When merged, the original parent ticket gets upvoted (+8 priority points), boosting urgent community issues to the top of the queue.
+  - Chained duplicates automatically resolve to the single root master ticket.
+- **Explainable AI (XAI):** Every single ticket includes a plain-English explanation of why the department was picked, which keywords triggered it, and how the 1–100 urgency score was calculated.
+
+---
+
+## Tech Stack
+
+- **Frontend:** Vanilla HTML5, CSS3, JavaScript (no bloated heavy frameworks, instant load times, clean gov-tech aesthetic).
+- **Interactive Maps:** Leaflet.js with CartoDB clean tiles + OpenStreetMap Nominatim geocoding.
+- **Backend:** Python (`server.py` with multi-threaded HTTP server and REST endpoints).
+- **Database:** SQLite (`grievance_db.sqlite3` for complaints, `civic_users.db` for auth).
+- **AI & NLP:**
+  - `sentence-transformers` (`all-MiniLM-L6-v2`) for local 384-dimensional semantic embeddings.
+  - `vaderSentiment` for citizen distress analysis.
+  - `scikit-learn` for cosine similarity matrices.
+  - `Pillow` for photo texture variance and damage edge detection.
+  - `deep-translator` for multilingual input handling.
+
+---
+
+## How to run it locally
+
+### 1. Clone & Set up Virtual Environment
 ```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+# Clone repository
+git clone https://github.com/SilentK15/AwazSetu.git
+cd AwazSetu
 
+# Create & activate venv
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On Linux / Mac:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-> First run will download the `all-MiniLM-L6-v2` sentence-embedding model
-> (~90 MB) from Hugging Face, so make sure you have internet access the
-> first time you launch the app. It's cached locally after that.
+*(Note: On first run, it will download the lightweight `all-MiniLM-L6-v2` model (~90 MB) once. After that, it runs completely offline without any paid API keys).*
 
-## Running the app
-
+### 2. Start the Server
 ```bash
-streamlit run app.py
+python server.py
 ```
 
-The app opens at `http://localhost:8501`. A local SQLite database
-(`grievance_db.sqlite3`) is created automatically on first launch and
-pre-populated with the demo dataset.
+The portal will start on: **`http://127.0.0.1:8080/`**
 
-To reset the demo data, just delete `grievance_db.sqlite3` and restart the app.
+---
 
-## Optional: Gemini-powered translation
+## Demo Credentials for Testing
 
-By default, non-English text is translated using a free local fallback
-(`deep-translator`, no key required). If you want higher-quality translation,
-open the **⚙️ AI Engine Settings** panel in the sidebar and paste a Gemini API
-key — the app will automatically prefer it, and gracefully falls back if the
-call fails for any reason. To enable this path, also install:
+### Department Officer Accounts (Password: `admin123`)
+| Department | Username | Password | Access Scope |
+|---|---|---|---|
+| **Roads & Infrastructure** | `roads_admin` | `admin123` | Roads, potholes, and highway operations |
+| **Water Supply** | `water_admin` | `admin123` | Pipeline leaks and contamination queue |
+| **Electricity/Power** | `power_admin` | `admin123` | Streetlights and wiring hazards |
+| **Waste Management** | `waste_admin` | `admin123` | Garbage dumping and sanitation |
+| **Public Health** | `health_admin` | `admin123` | Open sewage and biohazard reports |
+| **Central Administration** | `admin` | `admin123` | Municipal Commissioner master view |
 
-```bash
-pip install google-generativeai
+### Citizen Portal
+- Click the **Citizen** tab on the login screen.
+- Log in with any registered 10-digit mobile number (e.g. `6359012124` / `9820011223`, password `admin123`) or click **Create Account** to register a new verified citizen account.
+
+---
+
+## Core Civic Innovations
+- **Whole-Site Multilingual UI**: 1-click global language switcher supporting English, Hindi (हिन्दी), and Marathi (मराठी) across all screens, navigation, and live data.
+- **Continuous Voice Dictation**: Speech-to-text with conversational pause recovery and Devanagari speech support.
+- **Single-Vote Community Upvoting**: Citizens can upvote existing complaints (+1 Affects Me Too) with strict duplicate vote prevention.
+- **Mandatory Photo Resolution Proof**: Officers must upload on-site "After" photographic evidence and notes to submit work.
+- **Citizen Verification & Auto-Deletion**: Once work is submitted, status becomes `Waiting for Citizen Confirmation`. When the citizen confirms the fix, the ticket is permanently closed and deleted from active complaints. If unsatisfied, the citizen reopens the ticket with elevated urgency.
+
+---
+
+## Project Structure
+
+```
+├── backend.py            # AI classification, priority scoring, duplicate detection engine
+├── server.py             # Python HTTP server & REST API endpoints
+├── grievance_db.sqlite3  # SQLite database storing grievances, embeddings, and photos
+├── civic_users.db        # SQLite database for citizen and admin auth
+├── public/               # Frontend assets
+│   ├── index.html        # Clean single-page application structure
+│   ├── styles.css        # Gov-tech design system & responsive styling
+│   └── app.js            # Leaflet map logic, location autocomplete, and dashboard state
+└── requirements.txt      # Python dependencies
 ```
 
-## Architecture notes
+---
 
-- **No external services required to run** — embeddings, sentiment, and
-  classification all run locally; translation degrades gracefully offline.
-- **Explainability by design** — `classify_department()` and
-  `score_priority()` both return a human-readable rationale string alongside
-  their decision, surfaced in both the citizen confirmation and the admin
-  ticket inspector.
-- **Duplicate vs. cluster distinction** — duplicate detection (submission-time,
-  strict thresholds: similarity > 0.80, distance ≤ 500 m) is separate from
-  root-cause clustering (dashboard-time, looser thresholds: similarity ≥ 0.55,
-  distance ≤ 1 km) so five separate potholes can cluster into one
-  "road resurfacing" story without being wrongly merged as literal duplicates.
-- **Swap in a real geocoded map picker** — the "Pick on map" mode in the
-  Citizen Portal already supports click-to-select lat/long via `streamlit-folium`.
-
-## Customizing for your city / problem statement
-
-- Edit `CITY_NAME`, `CITY_CENTER`, `WARDS`, and `PRESET_LOCATIONS` in `app.py`
-  to point at your own city.
-- Extend `DEPARTMENTS` and `SEVERITY_KEYWORDS` to add more departments or
-  tune scoring for your judges' rubric.
-- Tune `DUPLICATE_SIM_THRESHOLD` / `DUPLICATE_DIST_KM` and
-  `CLUSTER_SIM_THRESHOLD` / `CLUSTER_DIST_KM` to adjust sensitivity.
+Built with ❤️ for the Smart India Hackathon. Feel free to open issues or contribute!
