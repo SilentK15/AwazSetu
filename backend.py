@@ -69,7 +69,7 @@ PRESET_LOCATIONS = {
     "Colaba Causeway":       (18.9067, 72.8147),
 }
 
-STATUS_OPTIONS = ["Pending", "In Progress", "Waiting for Citizen Confirmation", "Reopened", "Resolved"]
+STATUS_OPTIONS = ["Pending", "In Progress", "Resolved"]
 PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 PRIORITY_COLORS = {"Critical": "#dc2626", "High": "#ea580c", "Medium": "#ca8a04", "Low": "#16a34a"}
 

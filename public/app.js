@@ -17,7 +17,7 @@ let citizenMarker = null;
 let adminMap = null;
 let adminMarkersLayer = null;
 
-const API_BASE = window.location.port === '8080' ? '' : 'http://localhost:8080';
+const API_BASE = '';
 
 // ═══════════════════════════════════════════════════════════════════════
 // MULTILINGUAL LOCALIZATION (i18n) DICTIONARY: EN, HI, MR

@@ -9,6 +9,7 @@ scikit-learn>=1.3
 vaderSentiment>=3.3.2
 langdetect>=1.0.9
 deep-translator>=1.11.4
+Pillow>=9.0.0
 
 # Optional — only needed if you want Gemini-powered translation instead of
 # the built-in free local fallback. Not required for the app to run.

@@ -84,28 +84,14 @@ The portal will start on: **`http://127.0.0.1:8080/`**
 
 ## Demo Credentials for Testing
 
-### Department Officer Accounts (Password: `admin123`)
-| Department | Username | Password | Access Scope |
-|---|---|---|---|
-| **Roads & Infrastructure** | `roads_admin` | `admin123` | Roads, potholes, and highway operations |
-| **Water Supply** | `water_admin` | `admin123` | Pipeline leaks and contamination queue |
-| **Electricity/Power** | `power_admin` | `admin123` | Streetlights and wiring hazards |
-| **Waste Management** | `waste_admin` | `admin123` | Garbage dumping and sanitation |
-| **Public Health** | `health_admin` | `admin123` | Open sewage and biohazard reports |
-| **Central Administration** | `admin` | `admin123` | Municipal Commissioner master view |
+- **Authority / Admin Portal:**
+  - Username: `admin`
+  - Password: `admin123`
+  - *(Gives access to Department Switcher, GIS incident map, Priority Queue, and ticket lifecycle controls)*
 
-### Citizen Portal
-- Click the **Citizen** tab on the login screen.
-- Log in with any registered 10-digit mobile number (e.g. `6359012124` / `9820011223`, password `admin123`) or click **Create Account** to register a new verified citizen account.
-
----
-
-## Core Civic Innovations
-- **Whole-Site Multilingual UI**: 1-click global language switcher supporting English, Hindi (हिन्दी), and Marathi (मराठी) across all screens, navigation, and live data.
-- **Continuous Voice Dictation**: Speech-to-text with conversational pause recovery and Devanagari speech support.
-- **Single-Vote Community Upvoting**: Citizens can upvote existing complaints (+1 Affects Me Too) with strict duplicate vote prevention.
-- **Mandatory Photo Resolution Proof**: Officers must upload on-site "After" photographic evidence and notes to submit work.
-- **Citizen Verification & Auto-Deletion**: Once work is submitted, status becomes `Waiting for Citizen Confirmation`. When the citizen confirms the fix, the ticket is permanently closed and deleted from active complaints. If unsatisfied, the citizen reopens the ticket with elevated urgency.
+- **Citizen Portal:**
+  - Click the **Citizen** tab on the login screen.
+  - Log in with any registered 10-digit mobile number (e.g. `6359012124` / `9820011223`) or click **Create Account** to register your own mobile number in 5 seconds.
 
 ---
 

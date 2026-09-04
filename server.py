@@ -18,7 +18,8 @@ from datetime import datetime
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 import backend
 
-PORT = 8080
+PORT = int(os.environ.get("PORT", 8080))
+HOST = os.environ.get("HOST", "0.0.0.0")
 PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
 USERS_DB_PATH = os.environ.get("CIVIC_USERS_DB", "civic_users.db")
 
@@ -442,9 +443,9 @@ class CivicRequestHandler(SimpleHTTPRequestHandler):
 def run_server():
     backend.init_db()
     init_users_db()
-    server_address = ("127.0.0.1", PORT)
+    server_address = (HOST, PORT)
     httpd = ThreadingHTTPServer(server_address, CivicRequestHandler)
-    print(f"AwazSetu Server running on http://127.0.0.1:{PORT}", flush=True)
+    print(f"AwazSetu Server running on http://{HOST}:{PORT}", flush=True)
     httpd.serve_forever()
 
 
